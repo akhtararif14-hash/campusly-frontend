@@ -13,7 +13,14 @@ export default function BuySell() {
     api.get("/api/user/products")
       .then(res => {
         console.log("Products from backend:", res.data)
-        setProducts(res.data)
+       if (Array.isArray(res.data)) {
+  setProducts(res.data);
+} else if (Array.isArray(res.data.products)) {
+  setProducts(res.data.products);
+} else {
+  setProducts([]);
+}
+
       })
       .catch(err => {
         console.error("Error fetching products", err)
@@ -50,7 +57,7 @@ export default function BuySell() {
         {products.map(item => {
           const imageSrc =
             item.image
-              ? `http://localhost:5000/${item.image}` // 🟢 Seller uploaded image
+              ? `http://campusly-backend-production.up.railway.app${item.image}` // 🟢 Seller uploaded image
               : item.img // 🟢 Static products
               ? item.img
               : "/images/no-image.png" // fallback
