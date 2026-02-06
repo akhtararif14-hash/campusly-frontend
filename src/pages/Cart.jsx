@@ -1,4 +1,6 @@
 import { useOutletContext, useNavigate } from "react-router-dom"
+const API = import.meta.env.VITE_API_URL;
+
 
 export default function Cart() {
   const { cart, increaseQty, decreaseQty } = useOutletContext()
@@ -28,7 +30,14 @@ export default function Cart() {
             className="flex justify-between items-center bg-gray-200 gap-4 p-3 mb-2 h-[170px] rounded"
           >
             <div className="flex gap-4 h-[150px]">
-              <img src={item.img} className="w-38 object-cover" />
+             <img
+  src={`${API}${item.image}`}
+  alt={item.title}
+  className="w-38 object-cover"
+  onError={(e) => {
+    e.target.style.display = "none";
+  }}
+/>
               <div>
                 <h2 className="font-semibold">{item.title}</h2>
                 <p>₹{item.price}</p>

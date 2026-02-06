@@ -1,98 +1,99 @@
-import React, { useState } from "react"
-import { NavLink, Outlet } from "react-router-dom"
-import Navbar from "../pages/Navbar.jsx"
-import { useAuth } from "../context/AuthContext"
+import React, { useState } from "react";
+import { NavLink, Outlet } from "react-router-dom";
+import Navbar from "../pages/Navbar.jsx";
+import { useAuth } from "../context/AuthContext";
 
 export default function DashboardLayout() {
-  const { user } = useAuth()
+  const { user } = useAuth();
 
-  const [cart, setCart] = useState([])
-  const [showPopup, setShowPopup] = useState(false)
-  const [products, setProducts] = useState([])
+  const [cart, setCart] = useState([]);
+  const [showPopup, setShowPopup] = useState(false);
+  const [products, setProducts] = useState([]);
 
   // 🔑 normalize id (MongoDB + local)
-  const getItemId = (item) => item._id || item.id
+  const getItemId = (item) => item._id || item.id;
 
   // ================= CART LOGIC =================
 
-  const clearCart = () => setCart([])
+  const clearCart = () => setCart([]);
 
   const addToCart = (product) => {
-    // 🚨 SAFETY CHECK (VERY IMPORTANT)
+    // 🚨 SAFETY CHECK
     if (!product.sellerId) {
-      console.error("Product missing sellerId:", product)
-      alert("This product cannot be added to cart (sellerId missing)")
-      return
+      console.error("Product missing sellerId:", product);
+      alert("This product cannot be added to cart");
+      return;
     }
 
-    setCart(prev => {
-      const productId = getItemId(product)
+    setCart((prev) => {
+      const productId = getItemId(product);
 
       const existing = prev.find(
-        item => getItemId(item) === productId
-      )
+        (item) => getItemId(item) === productId
+      );
 
       if (existing) {
-        return prev.map(item =>
+        return prev.map((item) =>
           getItemId(item) === productId
             ? { ...item, quantity: item.quantity + 1 }
             : item
-        )
+        );
       }
 
-      // ✅ EXPLICIT CART SHAPE (FIXES 500 ERROR)
+      // ✅ FIXED CART SHAPE (IMAGE ADDED)
       return [
         ...prev,
         {
           _id: product._id,
           title: product.title,
           price: product.price,
+          image: product.image,        // ✅ IMAGE FIX
           quantity: 1,
-          sellerId: product.sellerId, // ✅ CRITICAL FIX
+          sellerId: product.sellerId,  // ✅ REQUIRED FOR ORDERS
         },
-      ]
-    })
+      ];
+    });
 
-    setShowPopup(true)
-    setTimeout(() => setShowPopup(false), 2000)
-  }
+    setShowPopup(true);
+    setTimeout(() => setShowPopup(false), 2000);
+  };
 
   const increaseQty = (id) => {
-    setCart(prev =>
-      prev.map(item =>
+    setCart((prev) =>
+      prev.map((item) =>
         getItemId(item) === id
           ? { ...item, quantity: item.quantity + 1 }
           : item
       )
-    )
-  }
+    );
+  };
 
   const decreaseQty = (id) => {
-    setCart(prev =>
+    setCart((prev) =>
       prev
-        .map(item =>
+        .map((item) =>
           getItemId(item) === id
             ? { ...item, quantity: item.quantity - 1 }
             : item
         )
-        .filter(item => item.quantity > 0)
-    )
-  }
+        .filter((item) => item.quantity > 0)
+    );
+  };
 
   // ================= SIDEBAR =================
 
   const sidebarLinks = [
-    { name: "Home", path: "/" , imgsrc: "/images/home.png"},
-    { name: "Campus Shop", path: "/buy-sell" , imgsrc: "/images/shoppingcart.png" },
+    { name: "Home", path: "/", imgsrc: "/images/home.png" },
+    { name: "Campus Shop", path: "/buy-sell", imgsrc: "/images/shoppingcart.png" },
 
     ...(user && (user.role === "seller" || user.role === "admin")
       ? [{ name: "Seller Dashboard", path: "/seller", imgsrc: "/images/shoppingcart.png" }]
       : []),
 
     ...(user && user.role === "admin"
-      ? [{ name: "Admin Dashboard", path: "/admin" }]
+      ? [{ name: "Admin Dashboard", path: "/admin", imgsrc: "/images/shoppingcart.png" }]
       : []),
-  ]
+  ];
 
   // ================= UI =================
 
@@ -109,17 +110,20 @@ export default function DashboardLayout() {
       <div className="flex">
         {/* Sidebar */}
         <div className="flex flex-col p-2 sm:w-56 w-12 text-md space-y-2 pb-28 border-r border-gray-200 overflow-y-auto h-screen">
-          {sidebarLinks.map(item => (
+          {sidebarLinks.map((item) => (
             <NavLink
-            img={item.imgsrc}
-              key={item.name }
+              key={item.name}
               to={item.path}
               className={({ isActive }) =>
-                `p-2 rounded-lg text-black  ${isActive ? "bg-blue-200 font-bold" : ""
+                `p-2 rounded-lg text-black ${
+                  isActive ? "bg-blue-200 font-bold" : ""
                 }`
               }
             >
-             <div className="flex gap-1"><img className="w-[23px] " src={item.imgsrc} alt="img" /><p className=" sm:block hidden"> {item.name}</p></div>
+              <div className="flex gap-1 items-center">
+                <img className="w-[23px]" src={item.imgsrc} alt="icon" />
+                <p className="sm:block hidden">{item.name}</p>
+              </div>
             </NavLink>
           ))}
         </div>
@@ -140,5 +144,5 @@ export default function DashboardLayout() {
         </div>
       </div>
     </div>
-  )
+  );
 }
