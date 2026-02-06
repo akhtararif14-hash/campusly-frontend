@@ -13,13 +13,6 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
-
-  // 🚫 IMPORTANT:
-  // Do NOT force Content-Type here.
-  // Axios will set:
-  // - application/json for normal requests
-  // - multipart/form-data for FormData automatically
-
   return config
 })
 
