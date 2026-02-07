@@ -1,36 +1,44 @@
+
 import { useState } from "react";
-import { useNavigate, Navigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import { useAuth } from "../context/AuthContext";
+import { Navigate} from "react-router-dom";
 
-export default function Login() {
+
+
+
+
+export default function Signup() {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const { login, user } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
 
-  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
 
-    if (!email || !password) {
-      setError("Email and password are required");
+    if (!name || !email || !password) {
+      setError("All fields are required");
       return;
     }
 
     try {
       setLoading(true);
 
-      const res = await api.post("/api/auth/login", {
+      const res = await api.post("/api/auth/register", {
+        name,
         email,
         password,
       });
 
-      // ✅ correct AuthContext usage
+      // ✅ auto-login after signup
       login({
         token: res.data.token,
         user: res.data.user,
@@ -39,7 +47,7 @@ export default function Login() {
       navigate("/");
     } catch (err) {
       setError(
-        err?.response?.data?.message || "Invalid email or password"
+        err?.response?.data?.message || "Signup failed"
       );
     } finally {
       setLoading(false);
@@ -48,13 +56,20 @@ export default function Login() {
 
   return (
     <form onSubmit={handleSubmit} className="p-6 max-w-sm m-auto">
-      <h2 className="text-xl font-bold mb-4">Login</h2>
+      <h2 className="text-xl font-bold mb-4">Create Account</h2>
 
       {error && (
         <div className="mb-3 p-2 bg-red-100 text-red-700 rounded">
           {error}
         </div>
       )}
+
+      <input
+        className="border p-2 w-full mb-3"
+        placeholder="Name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+      />
 
       <input
         className="border p-2 w-full mb-3"
@@ -76,18 +91,8 @@ export default function Login() {
         className="bg-blue-600 text-white w-full py-2 rounded"
         disabled={loading}
       >
-        {loading ? "Logging in..." : "Login"}
+        {loading ? "Creating..." : "Signup"}
       </button>
-
-      <p className="text-center mt-4 text-sm">
-        Don’t have an account?{" "}
-        <span
-          className="text-blue-600 cursor-pointer"
-          onClick={() => navigate("/signup")}
-        >
-          Sign up
-        </span>
-      </p>
     </form>
   );
 }

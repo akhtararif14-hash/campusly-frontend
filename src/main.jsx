@@ -1,30 +1,42 @@
-import React from "react"
-import ReactDOM from "react-dom/client"
-import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom"
-import "./App.css"
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
+import "./App.css";
 
-import DashboardLayout from "./components/DashboardLayout.jsx"
-import DashboardHome from "./pages/DashboardHome.jsx"
-import BuySell from "./pages/BuySell.jsx"
-import Profile from "./pages/Profile.jsx"
-import Setting from "./pages/Setting"
-import Alert from "./pages/Alert.jsx"
-import Navbar from "./pages/Navbar.jsx"
-import Cart from "./pages/Cart.jsx"
-import SellerDashboard from "./pages/seller/SellerDashboard.jsx"
-import AdminDashboard from "./pages/admin/AdminDashboard.jsx"
-import NotFound from "./pages/NotFound.jsx"
-import Checkout from "./pages/Checkout.jsx"
-import OrderSuccess from "./pages/OrderSuccess.jsx"
-import Login from "./pages/Login.jsx"
+import DashboardLayout from "./components/DashboardLayout.jsx";
+import DashboardHome from "./pages/DashboardHome.jsx";
+import BuySell from "./pages/BuySell.jsx";
+import Profile from "./pages/Profile.jsx";
+import Setting from "./pages/Setting.jsx";
+import Alert from "./pages/Alert.jsx";
+import Navbar from "./pages/Navbar.jsx";
+import Cart from "./pages/Cart.jsx";
+import SellerDashboard from "./pages/seller/SellerDashboard.jsx";
+import AdminDashboard from "./pages/admin/AdminDashboard.jsx";
+import NotFound from "./pages/NotFound.jsx";
+import Checkout from "./pages/Checkout.jsx";
+import OrderSuccess from "./pages/OrderSuccess.jsx";
+import Login from "./pages/Login.jsx";
+import Signup from "./pages/Signup.jsx";
 
-import { AuthProvider } from "./context/AuthContext.jsx"
-import ProtectedRoute from "./routes/ProtectedRoute.jsx"
+import { AuthProvider } from "./context/AuthContext.jsx";
+import ProtectedRoute from "./routes/ProtectedRoute.jsx";
 
+/* ===========================
+   ROUTER CONFIG
+   =========================== */
 const router = createBrowserRouter([
   {
     path: "/login",
     element: <Login />,
+  },
+  {
+    path: "/signup",
+    element: <Signup />,
+  },
+  {
+    path: "/Signup",
+    element: <Navigate to="/signup" replace />,
   },
   {
     path: "/",
@@ -53,12 +65,9 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
-
-      { path: "user", element: <Navigate to="/" /> },
     ],
   },
 
-  // Standalone pages
   {
     path: "/profile",
     element: (
@@ -90,12 +99,15 @@ const router = createBrowserRouter([
       </>
     ),
   },
-])
+]);
 
+/* ===========================
+   APP BOOTSTRAP (ONE ROUTER)
+   =========================== */
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <AuthProvider>
       <RouterProvider router={router} />
     </AuthProvider>
   </React.StrictMode>
-)
+);

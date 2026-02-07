@@ -1,116 +1,211 @@
-import { useState, useEffect } from "react"
-import { useNavigate } from "react-router-dom"
-import api from "../api/axios"
-import { useAuth } from "../context/AuthContext"
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../api/axios";
+import { useAuth } from "../context/AuthContext";
 
 export default function Setting() {
-  const { user, updateUser, logout } = useAuth()
-  const [isSeller, setIsSeller] = useState(user?.role === "seller")
-  const [pw, setPw] = useState({ oldPassword: "", newPassword: "", confirm: "" })
-  const [loadingRole, setLoadingRole] = useState(false)
-  const [loadingPw, setLoadingPw] = useState(false)
-  const [message, setMessage] = useState(null)
-  const navigate = useNavigate()
+  const { user, updateUser, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const [isSeller, setIsSeller] = useState(user?.role === "seller");
+  const [loadingRole, setLoadingRole] = useState(false);
+
+  const [pw, setPw] = useState({
+    oldPassword: "",
+    newPassword: "",
+    confirm: "",
+  });
+  const [loadingPw, setLoadingPw] = useState(false);
+
+  const [message, setMessage] = useState(null);
 
   useEffect(() => {
-    if (!user) return
-    setIsSeller(user.role === "seller")
-  }, [user])
-
-  const handlePw = (e) => setPw({ ...pw, [e.target.name]: e.target.value })
+    if (!user) return;
+    setIsSeller(user.role === "seller");
+  }, [user]);
 
   const showMessage = (msg, type = "success") => {
-    setMessage({ msg, type })
-    setTimeout(() => setMessage(null), 4000)
-  }
+    setMessage({ msg, type });
+    setTimeout(() => setMessage(null), 4000);
+  };
 
-  const changePassword = async (e) => {
-    e.preventDefault()
-    if (pw.newPassword !== pw.confirm) return showMessage("New password and confirm do not match", "error")
+  // ================= ROLE TOGGLE =================
+  const toggleRole = async () => {
+    if (loadingRole) return;
+    if (!confirm("Are you sure you want to change your role?")) return;
 
     try {
-      setLoadingPw(true)
+      setLoadingRole(true);
+      const newRole = isSeller ? "user" : "seller";
+
+      const res = await api.put("/api/user/me/role", { role: newRole });
+
+      if (res.data?.token) {
+        localStorage.setItem("token", res.data.token);
+      }
+
+      updateUser(res.data.user);
+      setIsSeller(res.data.user.role === "seller");
+      showMessage(`Role changed to ${res.data.user.role}`);
+    } catch (err) {
+      showMessage(
+        err?.response?.data?.message || "Failed to change role",
+        "error"
+      );
+    } finally {
+      setLoadingRole(false);
+    }
+  };
+
+  // ================= CHANGE PASSWORD =================
+  const changePassword = async (e) => {
+    e.preventDefault();
+
+    if (!pw.oldPassword || !pw.newPassword) {
+      showMessage("All fields are required", "error");
+      return;
+    }
+
+    if (pw.newPassword !== pw.confirm) {
+      showMessage("Passwords do not match", "error");
+      return;
+    }
+
+    try {
+      setLoadingPw(true);
+
       await api.put("/api/user/me/password", {
         oldPassword: pw.oldPassword,
         newPassword: pw.newPassword,
-      })
-      showMessage("Password updated. Please login again.", "success")
+      });
+
+      showMessage("Password updated. Please login again.");
+
       setTimeout(() => {
-        logout()
-        navigate("/login")
-      }, 900)
+        logout();
+        navigate("/login");
+      }, 1000);
     } catch (err) {
-      const msg = err?.response?.data?.message || "Failed to change password"
-      showMessage(msg, "error")
+      showMessage(err?.response?.data?.message || "Failed", "error");
     } finally {
-      setLoadingPw(false)
+      setLoadingPw(false);
     }
-  }
+  };
 
-  const toggleSellerRole = async () => {
-    if (!confirm("Are you sure you want to change seller status?")) return
-
-    try {
-      setLoadingRole(true)
-      const newRole = isSeller ? "user" : "seller"
-      const res = await api.put("/api/user/me/role", { role: newRole })
-      // backend now returns { token, user }
-      if (res.data?.token) localStorage.setItem("token", res.data.token)
-      const updatedUser = res.data?.user || res.data
-      updateUser(updatedUser)
-      setIsSeller(updatedUser.role === "seller")
-      showMessage(`Role updated to ${updatedUser.role}`, "success")
-    } catch (err) {
-      const msg = err?.response?.data?.message || "Failed to update role"
-      showMessage(msg, "error")
-    } finally {
-      setLoadingRole(false)
-    }
-  }
+  // ================= LOGOUT =================
+  const handleLogout = () => {
+    if (!confirm("Are you sure you want to logout?")) return;
+    logout();
+    navigate("/login");
+  };
 
   return (
     <div className="p-6 max-w-xl m-auto">
+      {/* HEADER */}
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold">Settings</h1>
-        <button onClick={() => navigate("/")} className="text-sm px-3 py-1 bg-gray-200 rounded">Back</button>
+        <button
+          onClick={() => navigate(-1)}
+          className="text-sm px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+        >
+          ← Back
+        </button>
       </div>
 
       {message && (
-        <div className={`mb-4 p-3 rounded ${message.type === "success" ? "bg-blue-100 text-blue-800" : "bg-red-100 text-red-800"}`}>
+        <div
+          className={`mb-4 p-3 rounded ${
+            message.type === "success"
+              ? "bg-blue-100 text-blue-800"
+              : "bg-red-100 text-red-800"
+          }`}
+        >
           {message.msg}
         </div>
       )}
 
+      {/* ROLE TOGGLE */}
       <div className="bg-white p-4 rounded shadow mb-6">
-        <h2 className="font-semibold mb-3">Seller status</h2>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" className="sr-only peer" checked={isSeller} onChange={toggleSellerRole} disabled={loadingRole} />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer-checked:bg-blue-600 peer-checked:after:translate-x-5 after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all" />
-            </label>
-            <div>
-              <div className="text-sm">Current: <strong>{isSeller ? "Seller" : "User"}</strong></div>
-              <div className="text-xs text-gray-500">Toggle to switch your account type</div>
-            </div>
+        <h2 className="font-semibold mb-4">Account Role</h2>
+
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm text-gray-500">Current role</p>
+            <p className="font-bold text-lg">
+              {isSeller ? "Seller" : "User"}
+            </p>
           </div>
-          <button onClick={toggleSellerRole} className="px-3 py-1 bg-gray-100 rounded border" disabled={loadingRole}>{loadingRole ? 'Updating...' : (isSeller ? 'Switch to User' : 'Switch to Seller')}</button>
+
+          <button
+            onClick={toggleRole}
+            disabled={loadingRole}
+            className={`relative w-14 h-8 rounded-full transition-colors duration-500 ease-in-out
+              ${isSeller ? "bg-blue-600" : "bg-gray-300"}
+              ${loadingRole ? "opacity-50 cursor-not-allowed" : ""}
+            `}
+          >
+            <span
+              className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow
+                transition-transform duration-500 ease-in-out
+                ${isSeller ? "translate-x-6" : "translate-x-0"}
+              `}
+            />
+          </button>
         </div>
+
+        <p className="mt-3 text-xs text-gray-500">
+          Toggle to switch between User and Seller mode
+        </p>
       </div>
 
+      {/* CHANGE PASSWORD */}
       <form onSubmit={changePassword} className="bg-white p-4 rounded shadow">
         <h2 className="font-semibold mb-3">Change Password</h2>
-        <label className="block mb-2">Old Password</label>
-        <input name="oldPassword" value={pw.oldPassword} onChange={handlePw} type="password" className="w-full p-2 mb-3 border rounded" />
 
-        <label className="block mb-2">New Password</label>
-        <input name="newPassword" value={pw.newPassword} onChange={handlePw} type="password" className="w-full p-2 mb-3 border rounded" />
+        <input
+          type="password"
+          placeholder="Old password"
+          className="w-full p-2 mb-2 border rounded"
+          onChange={(e) =>
+            setPw({ ...pw, oldPassword: e.target.value })
+          }
+        />
 
-        <label className="block mb-2">Confirm New Password</label>
-        <input name="confirm" value={pw.confirm} onChange={handlePw} type="password" className="w-full p-2 mb-3 border rounded" />
+        <input
+          type="password"
+          placeholder="New password"
+          className="w-full p-2 mb-2 border rounded"
+          onChange={(e) =>
+            setPw({ ...pw, newPassword: e.target.value })
+          }
+        />
 
-        <button className="px-4 py-2 bg-red-500 text-white rounded" disabled={loadingPw}>{loadingPw ? 'Saving...' : 'Change Password'}</button>
+        <input
+          type="password"
+          placeholder="Confirm new password"
+          className="w-full p-2 mb-3 border rounded"
+          onChange={(e) =>
+            setPw({ ...pw, confirm: e.target.value })
+          }
+        />
+
+        <button
+          className="bg-blue-600 text-white px-4 py-2 rounded"
+          disabled={loadingPw}
+        >
+          {loadingPw ? "Saving..." : "Change Password"}
+        </button>
       </form>
+
+      {/* LOGOUT */}
+      <div className="mt-6 text-center">
+        <button
+          onClick={handleLogout}
+          className="bg-black text-white px-6 py-2 rounded hover:bg-gray-800"
+        >
+          Logout
+        </button>
+      </div>
     </div>
-  )
+  );
 }
