@@ -78,7 +78,15 @@ export default function Login() {
       >
         {loading ? "Logging in..." : "Login"}
       </button>
-
+      <button
+  onClick={() =>
+    window.location.href =
+      import.meta.env.VITE_API_URL + "/api/auth/google"
+  }
+  className="bg-red-500 text-white py-2 rounded"
+>
+  Continue with Google
+</button>
       <p className="text-center mt-4 text-sm">
         Don’t have an account?{" "}
         <span
@@ -89,5 +97,6 @@ export default function Login() {
         </span>
       </p>
     </form>
+    
   );
 }

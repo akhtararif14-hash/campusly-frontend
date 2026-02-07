@@ -1,4 +1,3 @@
-
 import { useOutletContext, useNavigate } from "react-router-dom"
 import { useEffect, useState } from "react"
 import api from "../api/axios"
@@ -11,37 +10,35 @@ export default function BuySell() {
 
   // 🔗 Fetch products from backend
   useEffect(() => {
-    api.get("/api/user/products")
-      .then(res => {
-        console.log("Products from backend:", res.data)
-       if (Array.isArray(res.data)) {
-  setProducts(res.data);
-} else if (Array.isArray(res.data.products)) {
-  setProducts(res.data.products);
-} else {
-  setProducts([]);
-}
-
+    api
+      .get("/api/user/products")
+      .then((res) => {
+        if (Array.isArray(res.data)) {
+          setProducts(res.data)
+        } else if (Array.isArray(res.data.products)) {
+          setProducts(res.data.products)
+        } else {
+          setProducts([])
+        }
       })
-      .catch(err => {
+      .catch((err) => {
         console.error("Error fetching products", err)
       })
   }, [])
 
   return (
-    <div className="container mx-auto ">
+    <div className="container mx-auto">
       {/* Header */}
       <div className="p-4 h-18 rounded-sm mb-6 bg-gray-200 flex items-center justify-between">
         <div>
           <h1 className="text-lg sm:text-2xl font-bold">Buy & Sell</h1>
-          
         </div>
 
         <div className="relative">
           <img
             src="/images/cart-svg.svg"
             alt="cart"
-            className="w-15 h-15  p-2 rounded-3xl cursor-pointer"
+            className="w-15 h-15 p-2 rounded-3xl cursor-pointer"
             onClick={() => navigate("/cart")}
           />
 
@@ -55,24 +52,23 @@ export default function BuySell() {
 
       {/* Products */}
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-        {products.map(item => {
-          const imageSrc =
-            item.image
-              ? `http://campusly-backend-production.up.railway.app${item.image}` // 🟢 Seller uploaded image
-              : item.img // 🟢 Static products
-              ? item.img
-              : "/images/no-image.png" // fallback
+        {products.map((item) => {
+          const imageSrc = item.image
+            ? `${import.meta.env.VITE_API_URL}${item.image}`
+            : item.img
+            ? item.img
+            : "/images/no-image.png"
 
           return (
             <article
               key={item._id || item.id}
-              className="bg-white p-1 rounded-lg max-w-42  overflow-hidden shadow-sm shadow-gray-600 "
+              className="bg-white p-1 rounded-lg max-w-42 overflow-hidden shadow-sm shadow-gray-600"
             >
-              <div className="h-40  flex relative items-center justify-center overflow-hidden bg-gray-100">
+              <div className="h-40 flex relative items-center justify-center overflow-hidden bg-gray-100">
                 <img
                   src={imageSrc}
                   alt={item.title}
-                  className="w-full h-full object-cover transition-transform duration-300 "
+                  className="w-full h-full object-cover transition-transform duration-300"
                 />
 
                 <p className="bg-blue-500 text-white absolute bottom-2 right-2 inline-block rounded-md text-[10px] px-2 py-1 font-semibold">

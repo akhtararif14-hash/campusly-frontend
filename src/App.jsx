@@ -34,7 +34,7 @@ function App() {
         <Route
           path="seller"
           element={
-            <ProtectedRoute role="seller">
+             <ProtectedRoute roles={["seller", "admin"]}>
               <SellerDashboard />
             </ProtectedRoute>
           }
