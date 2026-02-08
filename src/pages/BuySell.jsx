@@ -53,11 +53,8 @@ export default function BuySell() {
       {/* Products */}
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {products.map((item) => {
-          const imageSrc = item.image
-            ? `${import.meta.env.VITE_API_URL}${item.image}`
-            : item.img
-            ? item.img
-            : "/images/no-image.png"
+          const imageSrc =
+            item.image || item.img || "/images/no-image.png"
 
           return (
             <article

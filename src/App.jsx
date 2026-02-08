@@ -18,6 +18,7 @@ function App() {
       {/* ================= AUTH ROUTES ================= */}
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
+      <Route path="/oauth-success" element={<OAuthSuccess />} />
 
       {/* 🔒 AUTO-FIX CAPITAL URL */}
       <Route path="/Signup" element={<Navigate to="/signup" replace />} />

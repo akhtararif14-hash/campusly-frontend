@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate, Navigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import { useAuth } from "../context/AuthContext";
 
@@ -12,7 +12,23 @@ export default function Login() {
   const { login, user } = useAuth();
   const navigate = useNavigate();
 
-  
+  // ✅ HANDLE GOOGLE REDIRECT TOKEN
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get("token");
+
+    if (token) {
+      localStorage.setItem("token", token);
+      navigate("/", { replace: true });
+    }
+  }, [navigate]);
+
+  // ✅ ALREADY LOGGED IN
+  if (user) {
+    navigate("/");
+    return null;
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
@@ -30,7 +46,6 @@ export default function Login() {
         password,
       });
 
-      // ✅ correct AuthContext usage
       login({
         token: res.data.token,
         user: res.data.user,
@@ -44,6 +59,11 @@ export default function Login() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGoogleLogin = () => {
+    window.location.href =
+      import.meta.env.VITE_API_URL + "/api/auth/google";
   };
 
   return (
@@ -73,17 +93,21 @@ export default function Login() {
       />
 
       <button
+        type="submit"
         className="bg-blue-600 text-white w-full py-2 rounded"
         disabled={loading}
       >
         {loading ? "Logging in..." : "Login"}
       </button>
+
+      {/* ✅ GOOGLE LOGIN */}
       <button
+  type="button"
   onClick={() =>
     window.location.href =
       import.meta.env.VITE_API_URL + "/api/auth/google"
   }
-  className="bg-red-500 text-white py-2 rounded"
+  className="bg-red-500 text-white w-full py-2 rounded mt-3"
 >
   Continue with Google
 </button>
@@ -97,6 +121,5 @@ export default function Login() {
         </span>
       </p>
     </form>
-    
   );
 }
