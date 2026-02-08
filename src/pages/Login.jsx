@@ -13,23 +13,30 @@ export default function Login() {
   const navigate = useNavigate();
 
   // ✅ HANDLE GOOGLE REDIRECT TOKEN
- useEffect(() => {
-  const params = new URLSearchParams(window.location.search);
-  const token = params.get("token");
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get("token");
 
-  if (token) {
-    localStorage.setItem("token", token);
+    if (token) {
+      // save token
+      localStorage.setItem("token", token);
 
-    // OPTIONAL: decode token if you want user info later
-    navigate("/");
-  }
-}, []);
+      // OPTIONAL: fetch user from backend if needed later
+      login({
+        token,
+        user: null, // backend can be queried later
+      });
 
-  // ✅ ALREADY LOGGED IN
-  if (user) {
-    navigate("/");
-    return null;
-  }
+      navigate("/", { replace: true });
+    }
+  }, [login, navigate]);
+
+  // ✅ REDIRECT IF ALREADY LOGGED IN
+  useEffect(() => {
+    if (user) {
+      navigate("/", { replace: true });
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -53,7 +60,7 @@ export default function Login() {
         user: res.data.user,
       });
 
-      navigate("/");
+      navigate("/", { replace: true });
     } catch (err) {
       setError(
         err?.response?.data?.message || "Invalid email or password"
@@ -63,6 +70,7 @@ export default function Login() {
     }
   };
 
+  // ✅ GOOGLE LOGIN
   const handleGoogleLogin = () => {
     window.location.href =
       import.meta.env.VITE_API_URL + "/api/auth/google";
@@ -102,17 +110,15 @@ export default function Login() {
         {loading ? "Logging in..." : "Login"}
       </button>
 
-      {/* ✅ GOOGLE LOGIN */}
+      {/* ✅ GOOGLE LOGIN BUTTON */}
       <button
-  type="button"
-  onClick={() =>
-    window.location.href =
-      import.meta.env.VITE_API_URL + "/api/auth/google"
-  }
-  className="bg-red-500 text-white w-full py-2 rounded mt-3"
->
-  Continue with Google
-</button>
+        type="button"
+        onClick={handleGoogleLogin}
+        className="bg-red-500 text-white w-full py-2 rounded mt-3"
+      >
+        Continue with Google
+      </button>
+
       <p className="text-center mt-4 text-sm">
         Don’t have an account?{" "}
         <span
