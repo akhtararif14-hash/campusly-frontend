@@ -13,15 +13,17 @@ export default function Login() {
   const navigate = useNavigate();
 
   // ✅ HANDLE GOOGLE REDIRECT TOKEN
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const token = params.get("token");
+ useEffect(() => {
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get("token");
 
-    if (token) {
-      localStorage.setItem("token", token);
-      navigate("/", { replace: true });
-    }
-  }, [navigate]);
+  if (token) {
+    localStorage.setItem("token", token);
+
+    // OPTIONAL: decode token if you want user info later
+    navigate("/");
+  }
+}, []);
 
   // ✅ ALREADY LOGGED IN
   if (user) {
