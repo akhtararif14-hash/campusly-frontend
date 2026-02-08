@@ -94,20 +94,12 @@ export default function Login() {
     }
   };
 
-  // ✅ GOOGLE LOGIN
+  // ✅ GOOGLE LOGIN - HARDCODED FOR TESTING
   const handleGoogleLogin = () => {
-    const backendUrl = import.meta.env.VITE_API_URL;
-    const googleAuthUrl = `${backendUrl}/api/auth/google`;
+    console.log("🔵 Google login button clicked");
     
-    // Debug: Log the URL (remove this after testing)
-    console.log("🔵 Redirecting to:", googleAuthUrl);
-    console.log("🔵 Backend URL:", backendUrl);
-    
-    // Store the intended destination before redirect
-    localStorage.setItem("loginRedirect", "/");
-    
-    // Redirect to Google OAuth
-    window.location.href = googleAuthUrl;
+    // ✅ Hardcode temporarily to test
+    window.location.href = "https://campusly-backend-production.up.railway.app/api/auth/google";
   };
 
   return (
