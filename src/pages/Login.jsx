@@ -16,7 +16,15 @@ export default function Login() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const token = params.get("token");
-    const userId = params.get("userId"); // optional: if backend sends userId
+    const errorParam = params.get("error");
+
+    // Handle OAuth errors
+    if (errorParam) {
+      setError("Google authentication failed. Please try again.");
+      // Clean URL
+      window.history.replaceState({}, document.title, "/login");
+      return;
+    }
 
     if (token) {
       // Save token
@@ -88,10 +96,18 @@ export default function Login() {
 
   // ✅ GOOGLE LOGIN
   const handleGoogleLogin = () => {
+    const backendUrl = import.meta.env.VITE_API_URL;
+    const googleAuthUrl = `${backendUrl}/api/auth/google`;
+    
+    // Debug: Log the URL (remove this after testing)
+    console.log("🔵 Redirecting to:", googleAuthUrl);
+    console.log("🔵 Backend URL:", backendUrl);
+    
     // Store the intended destination before redirect
     localStorage.setItem("loginRedirect", "/");
     
-    window.location.href = `${import.meta.env.VITE_API_URL}/api/auth/google`;
+    // Redirect to Google OAuth
+    window.location.href = googleAuthUrl;
   };
 
   return (
