@@ -26,6 +26,7 @@ import ProtectedRoute from "./routes/ProtectedRoute.jsx";
    ROUTER CONFIG
    =========================== */
 const router = createBrowserRouter([
+  // ✅ AUTH ROUTES (PUBLIC)
   {
     path: "/login",
     element: <Login />,
@@ -38,6 +39,8 @@ const router = createBrowserRouter([
     path: "/Signup",
     element: <Navigate to="/signup" replace />,
   },
+
+  // ✅ MAIN DASHBOARD LAYOUT
   {
     path: "/",
     element: <DashboardLayout />,
@@ -45,10 +48,28 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <DashboardHome /> },
       { path: "buy-sell", element: <BuySell /> },
+      { path: "alert", element: <Alert /> },
       { path: "cart", element: <Cart /> },
       { path: "checkout", element: <Checkout /> },
       { path: "order-success", element: <OrderSuccess /> },
 
+      // ✅ PROTECTED ROUTES
+      {
+        path: "profile",
+        element: (
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "setting",
+        element: (
+          <ProtectedRoute>
+            <Setting />
+          </ProtectedRoute>
+        ),
+      },
       {
         path: "seller",
         element: (
@@ -68,41 +89,15 @@ const router = createBrowserRouter([
     ],
   },
 
+  // ✅ FALLBACK - CATCH ALL
   {
-    path: "/profile",
-    element: (
-      <ProtectedRoute>
-        <>
-          <Navbar />
-          <Profile />
-        </>
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/setting",
-    element: (
-      <ProtectedRoute>
-        <>
-          <Navbar />
-          <Setting />
-        </>
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/alert",
-    element: (
-      <>
-        <Navbar />
-        <Alert />
-      </>
-    ),
+    path: "*",
+    element: <NotFound />,
   },
 ]);
 
 /* ===========================
-   APP BOOTSTRAP (ONE ROUTER)
+   APP BOOTSTRAP
    =========================== */
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
