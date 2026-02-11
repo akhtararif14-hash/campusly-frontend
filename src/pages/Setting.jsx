@@ -32,7 +32,7 @@ export default function Setting() {
   // ================= ROLE TOGGLE =================
   const toggleRole = async () => {
     if (loadingRole) return;
-    if (!confirm("Are you sure you want to change your role?")) return;
+   
 
     try {
       setLoadingRole(true);
