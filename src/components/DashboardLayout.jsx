@@ -6,7 +6,10 @@ import { useAuth } from "../context/AuthContext";
 export default function DashboardLayout() {
   const { user } = useAuth();
 
-  const [cart, setCart] = useState([]);
+  const [cart, setCart] = useState(() => {
+     const savedCart = localStorage.getItem("cart");
+     return savedCart ? JSON.parse(savedCart) : [];
+   });
   const [showPopup, setShowPopup] = useState(false);
   const [products, setProducts] = useState([]);
 
@@ -19,6 +22,9 @@ export default function DashboardLayout() {
 
   const addToCart = (product) => {
     // 🚨 SAFETY CHECK
+    useEffect(() => {
+     localStorage.setItem("cart", JSON.stringify(cart));
+   }, [cart]);
     if (!product.sellerId) {
       console.error("Product missing sellerId:", product);
       alert("This product cannot be added to cart");
@@ -31,6 +37,10 @@ export default function DashboardLayout() {
       const existing = prev.find(
         (item) => getItemId(item) === productId
       );
+      const clearCart = () => {
+     setCart([]);
+     localStorage.removeItem("cart");
+   };
 
       if (existing) {
         return prev.map((item) =>
