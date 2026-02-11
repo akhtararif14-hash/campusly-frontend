@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import Navbar from "../pages/Navbar.jsx";
 import { useAuth } from "../context/AuthContext";
@@ -6,25 +6,41 @@ import { useAuth } from "../context/AuthContext";
 export default function DashboardLayout() {
   const { user } = useAuth();
 
+  // ✅ Load cart from localStorage on mount
   const [cart, setCart] = useState(() => {
-     const savedCart = localStorage.getItem("cart");
-     return savedCart ? JSON.parse(savedCart) : [];
-   });
+    try {
+      const savedCart = localStorage.getItem("cart");
+      return savedCart ? JSON.parse(savedCart) : [];
+    } catch (error) {
+      console.error("Error loading cart from localStorage:", error);
+      return [];
+    }
+  });
+  
   const [showPopup, setShowPopup] = useState(false);
   const [products, setProducts] = useState([]);
+
+  // ✅ Save cart to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem("cart", JSON.stringify(cart));
+    } catch (error) {
+      console.error("Error saving cart to localStorage:", error);
+    }
+  }, [cart]);
 
   // 🔑 normalize id (MongoDB + local)
   const getItemId = (item) => item._id || item.id;
 
   // ================= CART LOGIC =================
 
-  const clearCart = () => setCart([]);
+  const clearCart = () => {
+    setCart([]);
+    localStorage.removeItem("cart");
+  };
 
   const addToCart = (product) => {
     // 🚨 SAFETY CHECK
-    useEffect(() => {
-     localStorage.setItem("cart", JSON.stringify(cart));
-   }, [cart]);
     if (!product.sellerId) {
       console.error("Product missing sellerId:", product);
       alert("This product cannot be added to cart");
@@ -37,10 +53,6 @@ export default function DashboardLayout() {
       const existing = prev.find(
         (item) => getItemId(item) === productId
       );
-      const clearCart = () => {
-     setCart([]);
-     localStorage.removeItem("cart");
-   };
 
       if (existing) {
         return prev.map((item) =>
