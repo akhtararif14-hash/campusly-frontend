@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
@@ -44,7 +43,14 @@ export default function Signup() {
         user: res.data.user,
       });
 
-      navigate("/");
+      // Check if there's a saved return path (e.g., from checkout)
+      const returnPath = localStorage.getItem('returnPath');
+      if (returnPath) {
+        localStorage.removeItem('returnPath');
+        navigate(returnPath, { replace: true });
+      } else {
+        navigate("/", { replace: true });
+      }
     } catch (err) {
       setError(
         err?.response?.data?.message || "Signup failed"

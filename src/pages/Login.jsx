@@ -42,7 +42,14 @@ export default function Login() {
             user: res.data.user,
           });
 
-          navigate("/", { replace: true });
+          // Check if there's a saved return path (e.g., from checkout)
+          const returnPath = localStorage.getItem('returnPath');
+          if (returnPath) {
+            localStorage.removeItem('returnPath');
+            navigate(returnPath, { replace: true });
+          } else {
+            navigate("/", { replace: true });
+          }
         } catch (err) {
           console.error("Failed to fetch user:", err);
           // Fallback: just login with token
@@ -84,7 +91,14 @@ export default function Login() {
         user: res.data.user,
       });
 
-      navigate("/", { replace: true });
+      // Check if there's a saved return path (e.g., from checkout)
+      const returnPath = localStorage.getItem('returnPath');
+      if (returnPath) {
+        localStorage.removeItem('returnPath');
+        navigate(returnPath, { replace: true });
+      } else {
+        navigate("/", { replace: true });
+      }
     } catch (err) {
       setError(
         err?.response?.data?.message || "Invalid email or password"

@@ -1,5 +1,6 @@
 import { useOutletContext, useNavigate } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
+import { useEffect } from "react"
 import api from "../api/axios"
 
 export default function Checkout() {
@@ -9,14 +10,63 @@ export default function Checkout() {
   const navigate = useNavigate()
   const { user } = useAuth()
 
-  // 🔐 Not logged in
+  // 🔐 Not logged in - redirect to login with return path
+  useEffect(() => {
+    if (!user) {
+      // Save the current path so we can return after login
+      localStorage.setItem('returnPath', '/checkout');
+    }
+  }, [user]);
+
+  // 🔐 Show login prompt if not authenticated
   if (!user) {
-    return <p className="p-6 text-red-600">Please login to place an order</p>
+    return (
+      <div className="p-6 max-w-md mx-auto text-center">
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 mb-4">
+          <h2 className="text-xl font-bold text-yellow-800 mb-2">
+            🔒 Login Required
+          </h2>
+          <p className="text-yellow-700 mb-4">
+            Please sign in to complete your purchase. Your cart items will be saved!
+          </p>
+          <div className="flex gap-3 justify-center">
+            <button
+              onClick={() => navigate('/login')}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded transition"
+            >
+              Login
+            </button>
+            <button
+              onClick={() => navigate('/signup')}
+              className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded transition"
+            >
+              Sign Up
+            </button>
+          </div>
+        </div>
+        <button
+          onClick={() => navigate('/buy-sell')}
+          className="text-gray-600 hover:text-gray-800 underline"
+        >
+          ← Continue Shopping
+        </button>
+      </div>
+    )
   }
 
   // 🛒 Empty cart
   if (cart.length === 0) {
-    return <p className="p-6">Your cart is empty</p>
+    return (
+      <div className="p-6 text-center">
+        <p className="text-gray-600 mb-4">Your cart is empty</p>
+        <button
+          onClick={() => navigate('/buy-sell')}
+          className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
+        >
+          Start Shopping
+        </button>
+      </div>
+    )
   }
 
   const totalPrice = cart.reduce((sum, item) => {
@@ -61,6 +111,8 @@ export default function Checkout() {
       )
 
       clearCart()
+      // Clear the return path after successful order
+      localStorage.removeItem('returnPath');
       navigate("/order-success")
     } catch (err) {
       console.error("ORDER ERROR:", err.response?.data || err.message)
@@ -92,7 +144,7 @@ export default function Checkout() {
 
       <button
         onClick={placeOrder}
-        className="mt-6 bg-blue-600 text-white py-3 w-full rounded text-lg"
+        className="mt-6 bg-blue-600 text-white py-3 w-full rounded text-lg hover:bg-blue-700 transition"
       >
         Place Order
       </button>
