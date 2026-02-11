@@ -20,7 +20,7 @@ export default function Cart() {
             {/* IMAGE — SAME SIZE, SAME PLACE */}
             {item.image && (
               <img
-                src={`${API}${item.image}`}
+                src={item.image.startsWith('http') ? item.image : `${API}${item.image}`}
                 className="w-38 object-cover"
                 alt={item.title}
               />
