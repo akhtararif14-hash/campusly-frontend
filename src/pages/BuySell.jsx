@@ -36,7 +36,7 @@ export default function BuySell() {
 
         <div className="relative">
           <img
-            src="/images/cart-svg.svg"
+            src="/images/scale.webp"
             alt="cart"
             className="w-15 h-15 p-2 rounded-3xl cursor-pointer"
             onClick={() => navigate("/cart")}
