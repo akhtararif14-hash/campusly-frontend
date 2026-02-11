@@ -11,7 +11,7 @@ export default function BuySell() {
   // 🔗 Fetch products from backend
   useEffect(() => {
     api
-      .get("/api/user/products")
+      .get("/api/seller/products")
       .then((res) => {
         if (Array.isArray(res.data)) {
           setProducts(res.data)
