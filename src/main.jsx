@@ -11,6 +11,7 @@ import Setting from "./pages/Setting.jsx";
 import Alert from "./pages/Alert.jsx";
 import Navbar from "./pages/Navbar.jsx";
 import Cart from "./pages/Cart.jsx";
+import Feed from "./pages/Feed.jsx"; // ✅ NEW
 import SellerDashboard from "./pages/seller/SellerDashboard.jsx";
 import AdminDashboard from "./pages/admin/AdminDashboard.jsx";
 import NotFound from "./pages/NotFound.jsx";
@@ -48,6 +49,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <DashboardHome /> },
       { path: "buy-sell", element: <BuySell /> },
+      { path: "feed", element: <Feed /> }, // ✅ NEW - Social Feed (PUBLIC)
       { path: "alert", element: <Alert /> },
       { path: "cart", element: <Cart /> },
       { path: "checkout", element: <Checkout /> },

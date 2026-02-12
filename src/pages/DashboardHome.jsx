@@ -5,6 +5,7 @@ const DashboardHome = () => {
        <button className="bg-white text-black px-4 py-2 rounded-4xl hover:bg-gray-200 transition-colors">
         Expolre
        </button>
+       
        <button className="bg-white text-black px-4 py-2 rounded-4xl hover:bg-gray-200 transition-colors">
         Events Near You
        </button>
