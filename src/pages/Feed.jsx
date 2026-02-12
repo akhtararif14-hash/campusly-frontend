@@ -1,6 +1,3 @@
-import { useEffect, useState } from "react";
-import { useAuth } from "../context/AuthContext";
-import api from "../api/axios";
 
 export default function Feed() {
   const { user } = useAuth();
@@ -144,7 +141,6 @@ export default function Feed() {
     <div className="max-w-2xl mx-auto p-4">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Campus Feed</h1>
         {user && (
           <button
             onClick={() => setShowCreateModal(true)}
