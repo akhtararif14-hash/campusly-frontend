@@ -27,9 +27,9 @@ export default function BuySell() {
   }, [])
 
   return (
-    <div className="container mx-auto">
+    <div className="container mx-auto pb-16">
       {/* Header */}
-      <div className="p-4 h-18 rounded-sm mb-6 bg-gray-200 flex items-center justify-between">
+      <div className="p-4 h-18 rounded-sm mb-6 bg-gray-100 flex items-center justify-between">
         <div>
           <h1 className="text-lg sm:text-2xl font-bold">Buy & Sell</h1>
         </div>
