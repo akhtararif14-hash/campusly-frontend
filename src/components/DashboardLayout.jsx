@@ -131,18 +131,18 @@ export default function DashboardLayout() {
 
       <div className="flex">
         {/* Sidebar */}
-        <div className="flex flex-col p-2 sm:w-56 w-12 text-md space-y-2 pb-28 border-r border-gray-200 overflow-y-auto h-screen">
+        <div className="flex flex-col p-2 sm:w-56 w-12 text-md space-y-2 pb-28  bg-gray-100 overflow-y-auto h-screen">
           {sidebarLinks.map((item) => (
             <NavLink
               key={item.name}
               to={item.path}
               className={({ isActive }) =>
-                `p-2 rounded-lg text-black ${
+                `p-2 rounded-sm text-black ${
                   isActive ? "bg-blue-200 font-bold" : ""
                 }`
               }
             >
-              <div className="flex gap-1 items-center">
+              <div className="flex gap-1  items-center">
                 <img className="w-[23px]" src={item.imgsrc} alt="icon" />
                 <p className="sm:block hidden">{item.name}</p>
               </div>
@@ -151,7 +151,7 @@ export default function DashboardLayout() {
         </div>
 
         {/* Content */}
-        <div className="flex-1 p-1 sm:p-2 md:p-4 bg-white overflow-y-auto h-screen space-y-10 pb-40">
+        <div  className="flex-col w-full hide-scrollbar  m-1 mb-8 sm:p-2 md:p-4 bg-white overflow-y-auto h-screen space-y-10 pb-40">
           <Outlet
             context={{
               cart,

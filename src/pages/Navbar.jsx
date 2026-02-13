@@ -14,7 +14,7 @@ export default function Navbar() {
   return (
     <nav className="border-gray-100 border-b-1 " aria-label="Main navigation">
       <div className="flex justify-between p-2 items-center text-black">
-        <div className="logo font-bold text-3xl">ConnectUp</div>
+        <div className="logo font-bold text-3xl">NetworkUp</div>
 
         <ul className="flex text-xl gap-4">
           <NavLink to="/profile" style={navLinkStyles} className="p-1 focus:bg-blue-200 font-semibold border-1 border-gray-200 text-sm rounded-md hover:bg-gray-200" end>
