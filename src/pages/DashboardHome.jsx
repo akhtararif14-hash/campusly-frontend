@@ -46,7 +46,7 @@ const DashboardHome = () => {
       setCreating(true);
       const res = await api.post("/api/feed/post", formData);
 
-      setPosts([res.data, ...posts]); // Add new post to top
+      setPosts([res.data, ...posts]);
       setShowCreateModal(false);
       setNewPostImage(null);
       setNewPostCaption("");
