@@ -1,6 +1,6 @@
- import { useEffect, useState } from "react";
-  import { useAuth } from "../context/AuthContext";
-  import api from "../api/axios";
+import { useEffect, useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import api from "../api/axios";
     
 const DashboardHome = () => {
   const { user } = useAuth();
@@ -141,217 +141,222 @@ const DashboardHome = () => {
   }
 
   return (
-    <div className="space-y-3">
-      {/* header */}
+    <div className="space-y-3 border-1">
+      {/* Blue Header */}
       <div className="border-1 p-4 rounded-4xl bg-blue-500 text-white px-4 py-3 flex items-center gap-4">
-       <button className="bg-white text-black px-4 py-2 rounded-4xl hover:bg-gray-200 transition-colors">
-        Expolre
-       </button>
-
-       <button className="bg-white text-black px-4 py-2 rounded-4xl hover:bg-gray-200 transition-colors">
-        Events Near You
-       </button>
-        <input type="button" value="Search" className="bg-white text-black px-60 py-2 rounded-4xl hover:bg-gray-200 transition-colors" />
         <button className="bg-white text-black px-4 py-2 rounded-4xl hover:bg-gray-200 transition-colors">
-        Messages
-       </button>
-       <button className="bg-white text-black px-4 py-2 rounded-4xl hover:bg-gray-200 transition-colors">
-        Connections
-       </button>
-       <button className="bg-white text-black px-4 py-2 rounded-4xl hover:bg-gray-200 transition-colors">
-        Trending Topics In JMI
-       </button>
-      </div>
-       {/* Feed posts */}
-      <div className="border-1 border-black p-4 rounded-4xl h-[80vh] overflow-y-auto">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
+          Explore
+        </button>
+
+        <button className="bg-white text-black px-4 py-2 rounded-4xl hover:bg-gray-200 transition-colors">
+          Events Near You
+        </button>
         
-        {user && (
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
-          >
-            + Create Post
-          </button>
-        )}
+        <input type="button" value="Search" className="bg-white text-black px-60 py-2 rounded-4xl hover:bg-gray-200 transition-colors" />
+        
+        <button className="bg-white text-black px-4 py-2 rounded-4xl hover:bg-gray-200 transition-colors">
+          Messages
+        </button>
+        
+        <button className="bg-white text-black px-4 py-2 rounded-4xl hover:bg-gray-200 transition-colors">
+          Connections
+        </button>
+        
+        <button className="bg-white text-black px-4 py-2 rounded-4xl hover:bg-gray-200 transition-colors">
+          Trending Topics In JMI
+        </button>
       </div>
 
-      {/* Create Post Modal */}
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
-            <h2 className="text-xl font-bold mb-4">Create Post</h2>
+      {/* Feed Container */}
+      <div className="border-1 border-black p-4 rounded-4xl bg-white h-[80vh] overflow-y-auto">
+        
+        {/* Create Post Button */}
+        <div className="flex justify-between items-center mb-6">
+          {user && (
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+            >
+              + Create Post
+            </button>
+          )}
+        </div>
 
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => {
-                const file = e.target.files[0];
-                if (file) {
-                  setNewPostImage(file);
-                  setPreview(URL.createObjectURL(file));
-                }
-              }}
-              className="mb-3"
-            />
+        {/* Create Post Modal */}
+        {showCreateModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg p-6 max-w-md w-full">
+              <h2 className="text-xl font-bold mb-4 text-black">Create Post</h2>
 
-            {preview && (
-              <img
-                src={preview}
-                alt="preview"
-                className="w-full h-64 object-cover rounded mb-3"
-              />
-            )}
-
-            <textarea
-              placeholder="Write a caption..."
-              value={newPostCaption}
-              onChange={(e) => setNewPostCaption(e.target.value)}
-              className="border w-full p-2 rounded mb-4 h-20"
-            />
-
-            <div className="flex gap-2">
-              <button
-                onClick={handleCreatePost}
-                disabled={creating}
-                className="flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50"
-              >
-                {creating ? "Posting..." : "Post"}
-              </button>
-              <button
-                onClick={() => {
-                  setShowCreateModal(false);
-                  setNewPostImage(null);
-                  setNewPostCaption("");
-                  setPreview(null);
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    setNewPostImage(file);
+                    setPreview(URL.createObjectURL(file));
+                  }
                 }}
-                className="flex-1 bg-gray-200 py-2 rounded hover:bg-gray-300"
-              >
-                Cancel
-              </button>
+                className="mb-3 text-black"
+              />
+
+              {preview && (
+                <img
+                  src={preview}
+                  alt="preview"
+                  className="w-full h-64 object-cover rounded mb-3"
+                />
+              )}
+
+              <textarea
+                placeholder="Write a caption..."
+                value={newPostCaption}
+                onChange={(e) => setNewPostCaption(e.target.value)}
+                className="border w-full p-2 rounded mb-4 h-20 text-black"
+              />
+
+              <div className="flex gap-2">
+                <button
+                  onClick={handleCreatePost}
+                  disabled={creating}
+                  className="flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {creating ? "Posting..." : "Post"}
+                </button>
+                <button
+                  onClick={() => {
+                    setShowCreateModal(false);
+                    setNewPostImage(null);
+                    setNewPostCaption("");
+                    setPreview(null);
+                  }}
+                  className="flex-1 bg-gray-200 py-2 rounded hover:bg-gray-300 text-black"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
-
-      {/* Posts Feed */}
-      <div className="space-y-6">
-        {posts.length === 0 ? (
-          <p className="text-center text-gray-500">No posts yet. Be the first to post!</p>
-        ) : (
-          posts.map((post) => (
-            <div key={post._id} className="bg-white rounded-lg shadow border">
-              {/* Post Header */}
-              <div className="p-4 flex justify-between items-center">
-                <div>
-                  <p className="font-semibold">{post.userName}</p>
-                  <p className="text-xs text-gray-500">{formatDate(post.createdAt)}</p>
-                </div>
-                {user && post.userId === user._id && (
-                  <button
-                    onClick={() => handleDeletePost(post._id)}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    Delete
-                  </button>
-                )}
-              </div>
-
-              {/* Post Image */}
-              <img
-                src={post.image}
-                alt={post.caption}
-                className="w-full max-h-96 object-cover"
-              />
-
-              {/* Post Actions */}
-              <div className="p-4">
-                <div className="flex gap-4 mb-2">
-                  <button
-                    onClick={() => handleLikePost(post._id)}
-                    className={`flex items-center gap-1 ${
-                      user && post.likes.includes(user._id)
-                        ? "text-red-500"
-                        : "text-gray-700"
-                    }`}
-                  >
-                    <span className="text-xl">
-                      {user && post.likes.includes(user._id) ? "❤️" : "🤍"}
-                    </span>
-                    <span className="text-sm">{post.likes.length}</span>
-                  </button>
-
-                  <button
-                    onClick={() =>
-                      setShowComments({
-                        ...showComments,
-                        [post._id]: !showComments[post._id],
-                      })
-                    }
-                    className="flex items-center gap-1 text-gray-700"
-                  >
-                    <span className="text-xl">💬</span>
-                    <span className="text-sm">{post.comments.length}</span>
-                  </button>
-                </div>
-
-                {/* Caption */}
-                {post.caption && (
-                  <p className="mb-2">
-                    <span className="font-semibold">{post.userName}</span>{" "}
-                    {post.caption}
-                  </p>
-                )}
-
-                {/* Comments Section */}
-                {showComments[post._id] && (
-                  <div className="mt-3 border-t pt-3">
-                    {post.comments.map((comment) => (
-                      <div key={comment._id} className="mb-2 text-sm">
-                        <span className="font-semibold">{comment.userName}</span>{" "}
-                        {comment.text}
-                      </div>
-                    ))}
-
-                    {/* Add Comment */}
-                    {user && (
-                      <div className="flex gap-2 mt-2">
-                        <input
-                          type="text"
-                          placeholder="Add a comment..."
-                          value={commentText[post._id] || ""}
-                          onChange={(e) =>
-                            setCommentText({
-                              ...commentText,
-                              [post._id]: e.target.value,
-                            })
-                          }
-                          onKeyPress={(e) => {
-                            if (e.key === "Enter") {
-                              handleAddComment(post._id);
-                            }
-                          }}
-                          className="flex-1 border rounded px-3 py-1"
-                        />
-                        <button
-                          onClick={() => handleAddComment(post._id)}
-                          className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
-                        >
-                          Post
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          ))
         )}
+
+        {/* Posts Feed */}
+        <div className="space-y-6">
+          {posts.length === 0 ? (
+            <p className="text-center text-gray-800">No posts yet. Be the first to post!</p>
+          ) : (
+            posts.map((post) => (
+              <div key={post._id} className="bg-white rounded-lg shadow border">
+                {/* Post Header */}
+                <div className="p-4 flex justify-between items-center">
+                  <div>
+                    <p className="font-semibold text-black">{post.userName}</p>
+                    <p className="text-xs text-gray-500">{formatDate(post.createdAt)}</p>
+                  </div>
+                  {user && post.userId === user._id && (
+                    <button
+                      onClick={() => handleDeletePost(post._id)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      Delete
+                    </button>
+                  )}
+                </div>
+
+                {/* Post Image */}
+                <img
+                  src={post.image}
+                  alt={post.caption}
+                  className="w-full max-h-96 object-cover"
+                />
+
+                {/* Post Actions */}
+                <div className="p-4">
+                  <div className="flex gap-4 mb-2">
+                    <button
+                      onClick={() => handleLikePost(post._id)}
+                      className={`flex items-center gap-1 ${
+                        user && post.likes.includes(user._id)
+                          ? "text-red-500"
+                          : "text-gray-700"
+                      }`}
+                    >
+                      <span className="text-xl">
+                        {user && post.likes.includes(user._id) ? "❤️" : "🤍"}
+                      </span>
+                      <span className="text-sm">{post.likes.length}</span>
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        setShowComments({
+                          ...showComments,
+                          [post._id]: !showComments[post._id],
+                        })
+                      }
+                      className="flex items-center gap-1 text-gray-700"
+                    >
+                      <span className="text-xl">💬</span>
+                      <span className="text-sm">{post.comments.length}</span>
+                    </button>
+                  </div>
+
+                  {/* Caption */}
+                  {post.caption && (
+                    <p className="mb-2 text-black">
+                      <span className="font-semibold">{post.userName}</span>{" "}
+                      {post.caption}
+                    </p>
+                  )}
+
+                  {/* Comments Section */}
+                  {showComments[post._id] && (
+                    <div className="mt-3 border-t pt-3">
+                      {post.comments.map((comment) => (
+                        <div key={comment._id} className="mb-2 text-sm text-black">
+                          <span className="font-semibold">{comment.userName}</span>{" "}
+                          {comment.text}
+                        </div>
+                      ))}
+
+                      {/* Add Comment */}
+                      {user && (
+                        <div className="flex gap-2 mt-2">
+                          <input
+                            type="text"
+                            placeholder="Add a comment..."
+                            value={commentText[post._id] || ""}
+                            onChange={(e) =>
+                              setCommentText({
+                                ...commentText,
+                                [post._id]: e.target.value,
+                              })
+                            }
+                            onKeyPress={(e) => {
+                              if (e.key === "Enter") {
+                                handleAddComment(post._id);
+                              }
+                            }}
+                            className="flex-1 border rounded px-3 py-1 text-black"
+                          />
+                          <button
+                            onClick={() => handleAddComment(post._id)}
+                            className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
+                          >
+                            Post
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       </div>
     </div>
-        </div>
-  )
-}
+  );
+};
 
-export default DashboardHome
+export default DashboardHome;
