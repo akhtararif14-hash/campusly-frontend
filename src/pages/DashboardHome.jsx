@@ -6,7 +6,6 @@ const DashboardHome = () => {
   const { user } = useAuth();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showCreateModal, setShowCreateModal] = useState(false);
   const [newPostImage, setNewPostImage] = useState(null);
   const [newPostCaption, setNewPostCaption] = useState("");
   const [preview, setPreview] = useState(null);
@@ -16,20 +15,21 @@ const DashboardHome = () => {
 
   // Fetch all posts
   useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        console.log('🔵 Fetching posts...');
+        const res = await api.get("/api/feed/posts");
+        console.log('✅ Posts received:', res.data);
+        setPosts(Array.isArray(res.data) ? res.data : []);
+      } catch (err) {
+        console.error("❌ Error fetching posts:", err);
+        setPosts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
     fetchPosts();
   }, []);
-
-  const fetchPosts = async () => {
-    try {
-      const res = await api.get("/api/feed/posts");
-      setPosts(Array.isArray(res.data) ? res.data : []);
-    } catch (err) {
-      console.error("Error fetching posts:", err);
-      setPosts([]);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // Create new post
   const handleCreatePost = async () => {
@@ -45,9 +45,7 @@ const DashboardHome = () => {
     try {
       setCreating(true);
       const res = await api.post("/api/feed/post", formData);
-
       setPosts([res.data, ...posts]);
-      setShowCreateModal(false);
       setNewPostImage(null);
       setNewPostCaption("");
       setPreview(null);
@@ -61,7 +59,7 @@ const DashboardHome = () => {
 
   // Delete post
   const handleDeletePost = async (postId) => {
-    if (!confirm("Delete this post?")) return;
+    if (!window.confirm("Delete this post?")) return;
 
     try {
       await api.delete(`/api/feed/post/${postId}`);
@@ -81,11 +79,15 @@ const DashboardHome = () => {
 
     try {
       const res = await api.post(`/api/feed/post/${postId}/like`);
-
       setPosts(
         posts.map((p) =>
           p._id === postId
-            ? { ...p, likes: res.data.liked ? [...p.likes, user._id] : p.likes.filter((id) => id !== user._id) }
+            ? {
+                ...p,
+                likes: res.data.liked
+                  ? [...(p.likes || []), user._id]
+                  : (p.likes || []).filter((id) => id !== user._id),
+              }
             : p
         )
       );
@@ -106,13 +108,13 @@ const DashboardHome = () => {
 
     try {
       const res = await api.post(`/api/feed/post/${postId}/comment`, { text });
-
       setPosts(
         posts.map((p) =>
-          p._id === postId ? { ...p, comments: [...p.comments, res.data] } : p
+          p._id === postId
+            ? { ...p, comments: [...(p.comments || []), res.data] }
+            : p
         )
       );
-
       setCommentText({ ...commentText, [postId]: "" });
     } catch (err) {
       console.error("Error adding comment:", err);
@@ -136,229 +138,210 @@ const DashboardHome = () => {
     return postDate.toLocaleDateString();
   };
 
- if (loading) {
-  return <div className="p-6 text-gray-600">Loading posts...</div>;
-}
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <div className="text-gray-600 text-lg">Loading posts...</div>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-3  scroll-auto pb-14">
-
-      <div className=" relative bg-gray-100 whitespace-nowrap p-4 rounded-sm  text-white px-4 py-3 flex gap-4">
-
-
-        <input type="text"
-
-          placeholder="What's on your mind?"
-          value={newPostCaption}
-          onChange={(e) => setNewPostCaption(e.target.value)}
-          className="bg-white border-gray-300 border-1 outline-none pl-2 text-black w-full py-3 rounded-4xl  " />
-        <label className=" text-black text-sm px-2 py-1 absolute top-5.5 right-34 rounded-4xl bg-gray-200 ">
-          Upload Image
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => {
-              const file = e.target.files[0];
-              if (file) {
-                setNewPostImage(file);
-                setPreview(URL.createObjectURL(file));
-              }
-            }}
-            className="hidden"
-          />
-        </label>
-        <button
-          onClick={handleCreatePost}
-          disabled={creating}
-          className=" text-black px-4 py-2 rounded-4xl bg-blue-400 hover:bg-blue-600 transition-colors"
-        >
-          {creating ? "Posting..." : "Add Post"}
-        </button>
-
-
-
-      </div>
-      <div className=" mb-14 p-4 min-h-[100vh] rounded-4xl text-white h-[80vh] flex items-center gap-4">
-      </div>
-
-
-      {/* Feed Container */}
-      <div className="p-4 rounded-4xl bg-white min-h-[100vh] h-[80vh] overflow-y-auto">
-
-        {/* Create Post Section */}
-        {user && (
-          <div className="relative bg-gray-100 p-4 rounded-sm mb-6">
-            <div className="flex gap-4 items-center">
+    <div className="space-y-6 pb-14">
+      {/* SINGLE Create Post Section */}
+      {user && (
+        <div className="bg-gray-100 p-4 rounded-2xl shadow-sm">
+          <div className="flex gap-3 items-center">
+            <input
+              type="text"
+              placeholder="What's on your mind?"
+              value={newPostCaption}
+              onChange={(e) => setNewPostCaption(e.target.value)}
+              className="flex-1 bg-white border border-gray-300 outline-none px-4 py-3 rounded-full text-black focus:ring-2 focus:ring-blue-400"
+            />
+            
+            <label className="cursor-pointer bg-gray-200 hover:bg-gray-300 text-black text-sm px-4 py-3 rounded-full transition-colors">
+              📷 Photo
               <input
-                type="text"
-                placeholder="What's on your mind?"
-                value={newPostCaption}
-                onChange={(e) => setNewPostCaption(e.target.value)}
-                className="bg-white border-gray-300 border-1 outline-none pl-4 text-black flex-1 py-3 rounded-4xl"
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    setNewPostImage(file);
+                    setPreview(URL.createObjectURL(file));
+                  }
+                }}
+                className="hidden"
               />
-              <label className=" text-black text-sm px-2 py-1 absolute top-5.5 right-34 rounded-4xl bg-gray-200 ">
-                Upload Image
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files[0];
-                    if (file) {
-                      setNewPostImage(file);
-                      setPreview(URL.createObjectURL(file));
-                    }
-                  }}
-                  className="hidden"
-                />
-              </label>
+            </label>
+
+            <button
+              onClick={handleCreatePost}
+              disabled={creating || !newPostImage}
+              className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {creating ? "Posting..." : "Post"}
+            </button>
+          </div>
+
+          {/* Image Preview */}
+          {preview && (
+            <div className="mt-4 flex items-center gap-4 p-3 bg-white rounded-xl">
+              <img
+                src={preview}
+                alt="preview"
+                className="w-24 h-24 object-cover rounded-lg"
+              />
               <button
-                onClick={handleCreatePost}
-                disabled={creating}
-                className=" text-black px-4 py-2 rounded-4xl bg-blue-400 hover:bg-blue-600 transition-colors"
+                onClick={() => {
+                  setNewPostImage(null);
+                  setPreview(null);
+                  setNewPostCaption("");
+                }}
+                className="text-red-600 hover:text-red-700 text-sm font-medium"
               >
-                {creating ? "Posting..." : "Add Post"}
+                ✕ Remove
               </button>
             </div>
+          )}
+        </div>
+      )}
 
-            {/* Image Preview */}
-            {preview && (
-              <div className="mt-4 flex items-center gap-4">
-                <img
-                  src={preview}
-                  alt="preview"
-                  className="w-32 h-32 object-cover rounded-4xl"
-                />
-                <button
-                  onClick={() => {
-                    setNewPostImage(null);
-                    setPreview(null);
-                  }}
-                  className="text-black px-3 py-1 rounded-4xl bg-gray-200 hover:bg-gray-300 text-sm"
-                >
-                  Remove
-                </button>
-              </div>
-            )}
+      {/* Login Prompt for Non-Users */}
+      {!user && (
+        <div className="bg-blue-50 border border-blue-200 p-4 rounded-2xl text-center">
+          <p className="text-blue-800">Please login to create posts and interact</p>
+        </div>
+      )}
+
+      {/* Posts Feed */}
+      <div className="space-y-6">
+        {posts.length === 0 ? (
+          <div className="text-center py-16 bg-gray-50 rounded-2xl">
+            <p className="text-gray-500 text-lg mb-2">No posts yet</p>
+            <p className="text-gray-400 text-sm">Be the first to share something!</p>
           </div>
-        )}
+        ) : (
+          posts.map((post) => (
+            <div key={post._id} className="bg-white rounded-2xl overflow-hidden shadow-md border border-gray-200">
+              {/* Post Header */}
+              <div className="p-4 flex justify-between items-center">
+                <div>
+                  <p className="font-semibold text-black text-lg">{post.userName}</p>
+                  <p className="text-xs text-gray-500">{formatDate(post.createdAt)}</p>
+                </div>
+                {user && post.userId === user._id && (
+                  <button
+                    onClick={() => handleDeletePost(post._id)}
+                    className="text-red-600 hover:text-red-700 text-sm font-medium px-3 py-1 rounded-lg hover:bg-red-50 transition-colors"
+                  >
+                    Delete
+                  </button>
+                )}
+              </div>
 
-        {/* Posts Feed */}
-        <div className="space-y-6">
-          {posts.length === 0 ? (
-            <p className="text-center text-gray-500 py-8">No posts yet. Be the first to post!</p>
-          ) : (
-            posts.map((post) => (
-              <div key={post._id} className="bg-gray-100 rounded-4xl overflow-hidden">
-                {/* Post Header */}
-                <div className="p-4 flex justify-between items-center bg-white">
-                  <div>
-                    <p className="font-semibold text-black">{post.userName}</p>
-                    <p className="text-xs text-gray-500">{formatDate(post.createdAt)}</p>
-                  </div>
-                  {user && post.userId === user._id && (
-                    <button
-                      onClick={() => handleDeletePost(post._id)}
-                      className="text-black px-3 py-1 rounded-4xl bg-gray-200 hover:bg-red-100 hover:text-red-600 transition-colors text-sm"
-                    >
-                      Delete
-                    </button>
-                  )}
+              {/* Post Image */}
+              <div className="w-full">
+                <img
+                  src={post.image}
+                  alt={post.caption || "Post image"}
+                  className="w-full h-auto object-cover"
+                />
+              </div>
+
+              {/* Post Actions */}
+              <div className="p-4">
+                <div className="flex gap-4 mb-3">
+                  <button
+                    onClick={() => handleLikePost(post._id)}
+                    disabled={!user}
+                    className={`flex items-center gap-2 transition-colors ${
+                      user && (post.likes || []).includes(user._id)
+                        ? "text-red-500"
+                        : "text-gray-700 hover:text-red-500"
+                    } ${!user ? "opacity-50 cursor-not-allowed" : ""}`}
+                  >
+                    <span className="text-2xl">
+                      {user && (post.likes || []).includes(user._id) ? "❤️" : "🤍"}
+                    </span>
+                    <span className="text-sm font-medium">{(post.likes || []).length}</span>
+                  </button>
+
+                  <button
+                    onClick={() =>
+                      setShowComments({
+                        ...showComments,
+                        [post._id]: !showComments[post._id],
+                      })
+                    }
+                    className="flex items-center gap-2 text-gray-700 hover:text-blue-500 transition-colors"
+                  >
+                    <span className="text-2xl">💬</span>
+                    <span className="text-sm font-medium">{(post.comments || []).length}</span>
+                  </button>
                 </div>
 
-                {/* Post Image */}
-                <div className="bg-gray-100 p-4">
-                  <img
-                    src={post.image}
-                    alt={post.caption}
-                    className="w-full max-w-2xl h-auto object-cover rounded-4xl mx-auto"
-                  />
-                </div>
+                {/* Caption */}
+                {post.caption && (
+                  <p className="mb-3 text-black">
+                    <span className="font-semibold">{post.userName}</span>{" "}
+                    {post.caption}
+                  </p>
+                )}
 
-                {/* Post Actions */}
-                <div className="p-4 bg-white">
-                  <div className="flex gap-4 mb-3">
-                    <button
-                      onClick={() => handleLikePost(post._id)}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-4xl transition-colors ${user && post.likes.includes(user._id)
-                        ? "bg-red-100 text-red-500"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                        }`}
-                    >
-                      <span className="text-xl">
-                        {user && post.likes.includes(user._id) ? "❤️" : "🤍"}
-                      </span>
-                      <span className="text-sm font-medium">{post.likes.length}</span>
-                    </button>
-
-                    <button
-                      onClick={() =>
-                        setShowComments({
-                          ...showComments,
-                          [post._id]: !showComments[post._id],
-                        })
-                      }
-                      className="flex items-center gap-2 px-4 py-2 rounded-4xl bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
-                    >
-                      <span className="text-xl">💬</span>
-                      <span className="text-sm font-medium">{post.comments.length}</span>
-                    </button>
-                  </div>
-
-                  {/* Caption */}
-                  {post.caption && (
-                    <p className="mb-3 text-black">
-                      <span className="font-semibold">{post.userName}</span>{" "}
-                      {post.caption}
-                    </p>
-                  )}
-
-                  {/* Comments Section */}
-                  {showComments[post._id] && (
-                    <div className="mt-4 pt-4 border-t border-gray-200">
+                {/* Comments Section */}
+                {showComments[post._id] && (
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    {post.comments && post.comments.length > 0 ? (
                       <div className="space-y-2 mb-4">
                         {post.comments.map((comment) => (
-                          <div key={comment._id} className="text-sm text-black bg-gray-50 p-3 rounded-4xl">
+                          <div key={comment._id} className="text-sm text-black">
                             <span className="font-semibold">{comment.userName}</span>{" "}
                             {comment.text}
                           </div>
                         ))}
                       </div>
+                    ) : (
+                      <p className="text-gray-500 text-sm mb-4">No comments yet</p>
+                    )}
 
-                      {/* Add Comment */}
-                      {user && (
-                        <div className="flex gap-2">
-                          <input
-                            type="text"
-                            placeholder="Add a comment..."
-                            value={commentText[post._id] || ""}
-                            onChange={(e) =>
-                              setCommentText({
-                                ...commentText,
-                                [post._id]: e.target.value,
-                              })
+                    {/* Add Comment */}
+                    {user ? (
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          placeholder="Add a comment..."
+                          value={commentText[post._id] || ""}
+                          onChange={(e) =>
+                            setCommentText({
+                              ...commentText,
+                              [post._id]: e.target.value,
+                            })
+                          }
+                          onKeyPress={(e) => {
+                            if (e.key === "Enter") {
+                              handleAddComment(post._id);
                             }
-                            onKeyPress={(e) => {
-                              if (e.key === "Enter") {
-                                handleAddComment(post._id);
-                              }
-                            }}
-                            className="flex-1 bg-white border-gray-300 border-1 outline-none rounded-4xl px-4 py-2 text-black"
-                          />
-                          <button
-                            onClick={() => handleAddComment(post._id)}
-                            className="bg-blue-400 text-white px-6 py-2 rounded-4xl hover:bg-blue-600 transition-colors"
-                          >
-                            Post
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
+                          }}
+                          className="flex-1 bg-gray-50 border border-gray-300 outline-none rounded-full px-4 py-2 text-black focus:ring-2 focus:ring-blue-400"
+                        />
+                        <button
+                          onClick={() => handleAddComment(post._id)}
+                          className="bg-blue-500 text-white px-6 py-2 rounded-full hover:bg-blue-600 transition-colors"
+                        >
+                          Post
+                        </button>
+                      </div>
+                    ) : (
+                      <p className="text-gray-500 text-sm text-center">Login to comment</p>
+                    )}
+                  </div>
+                )}
               </div>
-            ))
-          )}
-        </div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
