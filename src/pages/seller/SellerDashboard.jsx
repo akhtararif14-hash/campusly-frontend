@@ -200,7 +200,7 @@ export default function SellerDashboard() {
           {product.image && (
             <img
              src={product.image.startsWith('http') ? product.image : `${API}${product.image}`}
-              className="w-20 h-20 object-cover rounded"
+              className="w-full h-64 object-cover rounded"
               alt={product.title}
             />
           )}

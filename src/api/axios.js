@@ -1,13 +1,13 @@
-import axios from "axios";
+import axios from 'axios';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "https://campusly-backend-production.up.railway.app",
+  baseURL: import.meta.env.PROD 
+    ? 'https://campusly-backend-production.up.railway.app' 
+    : '/api' // Uses proxy in development
 });
 
-// Attach token automatically if available
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-
+  const token = localStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }

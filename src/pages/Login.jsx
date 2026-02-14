@@ -18,19 +18,15 @@ export default function Login() {
     const token = params.get("token");
     const errorParam = params.get("error");
 
-    // Handle OAuth errors
     if (errorParam) {
       setError("Google authentication failed. Please try again.");
-      // Clean URL
       window.history.replaceState({}, document.title, "/login");
       return;
     }
 
     if (token) {
-      // Save token
       localStorage.setItem("token", token);
 
-      // Fetch user details from backend
       const fetchUser = async () => {
         try {
           const res = await api.get("/api/auth/me", {
@@ -42,7 +38,6 @@ export default function Login() {
             user: res.data.user,
           });
 
-          // Check if there's a saved return path (e.g., from checkout)
           const returnPath = localStorage.getItem('returnPath');
           if (returnPath) {
             localStorage.removeItem('returnPath');
@@ -52,7 +47,6 @@ export default function Login() {
           }
         } catch (err) {
           console.error("Failed to fetch user:", err);
-          // Fallback: just login with token
           login({ token, user: null });
           navigate("/", { replace: true });
         }
@@ -81,17 +75,21 @@ export default function Login() {
     try {
       setLoading(true);
 
+      // 🔍 Add logging to debug
+      console.log("🔵 Attempting login with:", { email });
+
       const res = await api.post("/api/auth/login", {
         email,
         password,
       });
+
+      console.log("✅ Login successful:", res.data);
 
       login({
         token: res.data.token,
         user: res.data.user,
       });
 
-      // Check if there's a saved return path (e.g., from checkout)
       const returnPath = localStorage.getItem('returnPath');
       if (returnPath) {
         localStorage.removeItem('returnPath');
@@ -100,19 +98,27 @@ export default function Login() {
         navigate("/", { replace: true });
       }
     } catch (err) {
-      setError(
-        err?.response?.data?.message || "Invalid email or password"
-      );
+      // 🔍 Better error logging
+      console.error("❌ Login failed:", err);
+      console.error("❌ Error response:", err?.response);
+      console.error("❌ Error data:", err?.response?.data);
+      console.error("❌ Error status:", err?.response?.status);
+
+      // Better error message
+      if (err?.response?.status === 500) {
+        setError("Server error. Please contact support or try again later.");
+      } else {
+        setError(
+          err?.response?.data?.message || "Invalid email or password"
+        );
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  // ✅ GOOGLE LOGIN - HARDCODED FOR TESTING
   const handleGoogleLogin = () => {
     console.log("🔵 Google login button clicked");
-    
-    // ✅ Hardcode temporarily to test
     window.location.href = "https://campusly-backend-production.up.railway.app/api/auth/google";
   };
 
@@ -152,7 +158,6 @@ export default function Login() {
         {loading ? "Logging in..." : "Login"}
       </button>
 
-      {/* DIVIDER */}
       <div className="relative my-6">
         <div className="absolute inset-0 flex items-center">
           <div className="w-full border-t border-gray-300"></div>
@@ -188,7 +193,6 @@ export default function Login() {
         </svg>
         Continue with Google
       </button>
-
 
       <p className="text-center mt-6 text-sm text-gray-600">
         Don't have an account?{" "}

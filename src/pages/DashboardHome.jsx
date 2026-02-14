@@ -141,9 +141,9 @@ const DashboardHome = () => {
   }
 
   return (
-    <div className="space-y-3 border-1">
+    <div className="space-y-3">
       {/* Blue Header */}
-      <div className="border-1 p-4 rounded-4xl bg-blue-500 text-white px-4 py-3 flex items-center gap-4">
+      <div className="p-4 rounded-4xl bg-blue-500 text-white px-4 py-3 flex items-center gap-4">
         <button className="bg-white text-black px-4 py-2 rounded-4xl hover:bg-gray-200 transition-colors">
           Explore
         </button>
@@ -168,7 +168,7 @@ const DashboardHome = () => {
       </div>
 
       {/* Feed Container */}
-      <div className="border-1 border-black p-4 rounded-4xl bg-white h-[80vh] overflow-y-auto">
+      <div className="p-4 rounded-4xl bg-white h-[80vh] overflow-y-auto">
         
         {/* Create Post Button */}
         <div className="flex justify-between items-center mb-6">
@@ -205,7 +205,7 @@ const DashboardHome = () => {
                 <img
                   src={preview}
                   alt="preview"
-                  className="w-full h-64 object-cover rounded mb-3"
+                  className="w-64 h-64 object-cover rounded mb-3"
                 />
               )}
 
@@ -267,7 +267,7 @@ const DashboardHome = () => {
                 <img
                   src={post.image}
                   alt={post.caption}
-                  className="w-full max-h-96 object-cover"
+                  className="w-140 h-108 object-cover rounded mb-3 mx-auto"
                 />
 
                 {/* Post Actions */}
