@@ -136,9 +136,9 @@ const DashboardHome = () => {
     return postDate.toLocaleDateString();
   };
 
-  if (loading) {
-    return <div className="p-6 text-gray-600">Loading posts...</div>;
-  }
+ if (loading) {
+  return <div className="p-6 text-gray-600">Loading posts...</div>;
+}
 
   return (
     <div className="space-y-3  scroll-auto pb-14">
