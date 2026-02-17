@@ -12,7 +12,6 @@ export default function Profile() {
   const navigate = useNavigate();
   const [message, setMessage] = useState(null);
 
-
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -43,17 +42,17 @@ export default function Profile() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"];
     if (!validTypes.includes(file.type)) {
-      showMessage('Please upload JPG, PNG, GIF, or WEBP image', 'error');
-      e.target.value = '';
+      showMessage("Please upload JPG, PNG, GIF, or WEBP image", "error");
+      e.target.value = "";
       return;
     }
 
     const maxSize = 5 * 1024 * 1024;
     if (file.size > maxSize) {
-      showMessage(`Image too large. Max 5MB`, 'error');
-      e.target.value = '';
+      showMessage("Image too large. Max 5MB", "error");
+      e.target.value = "";
       return;
     }
 
@@ -63,36 +62,37 @@ export default function Profile() {
 
   const uploadProfileImage = async () => {
     if (!profileImage) {
-      showMessage('Please select an image first', 'error');
+      showMessage("Please select an image first", "error");
       return;
     }
 
     const formData = new FormData();
-    formData.append('profileImage', profileImage);
+    formData.append("profileImage", profileImage);
 
     try {
       setUploading(true);
-      const res = await api.put('/api/user/me/profile-image', formData);
+      const res = await api.put("/api/user/me/profile-image", formData, {
+        headers: { "Content-Type": "multipart/form-data" }, // ✅ header is here in the RIGHT function
+      });
       updateUser(res.data);
-      setImagePreview(res.data.profileImage);
+      setImagePreview(res.data.profileImage); // ✅ sync preview with Cloudinary URL
       setProfileImage(null);
-      showMessage('Profile picture updated!', 'success');
-      
+      showMessage("Profile picture updated!", "success");
+
       const fileInput = document.querySelector('input[type="file"]');
-      if (fileInput) fileInput.value = '';
+      if (fileInput) fileInput.value = "";
     } catch (err) {
-      showMessage(err.response?.data?.message || 'Failed to upload', 'error');
+      showMessage(err.response?.data?.message || "Failed to upload", "error");
     } finally {
       setUploading(false);
     }
   };
 
+  // ✅ FIXED: was accidentally calling the image upload endpoint — now correctly saves form data
   const saveProfile = async (e) => {
     e.preventDefault();
     try {
-     const res = await api.put('/api/user/me/profile-image', formData, {
-  headers: { 'Content-Type': 'multipart/form-data' }
-});
+      const res = await api.put("/api/user/me", form);
       updateUser(res.data);
       showMessage("Profile updated!", "success");
     } catch (err) {
@@ -120,11 +120,15 @@ export default function Profile() {
       {/* Profile Picture */}
       <div className="bg-white p-6 rounded-2xl shadow-md mb-6">
         <h2 className="text-xl font-semibold mb-4">Profile Picture</h2>
-        
+
         <div className="flex flex-col md:flex-row items-center gap-6">
           <div>
             {imagePreview ? (
-              <img src={imagePreview} alt="Profile" className="w-32 h-32 rounded-full object-cover border-4 border-blue-200" />
+              <img
+                src={imagePreview}
+                alt="Profile"
+                className="w-32 h-32 rounded-full object-cover border-4 border-blue-200"
+              />
             ) : (
               <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center border-4 border-gray-300">
                 <span className="text-4xl">👤</span>
@@ -149,7 +153,7 @@ export default function Profile() {
                   disabled={uploading}
                   className="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg disabled:opacity-50"
                 >
-                  {uploading ? 'Uploading...' : 'Upload'}
+                  {uploading ? "Uploading..." : "Upload"}
                 </button>
                 <button
                   onClick={() => {
@@ -169,24 +173,43 @@ export default function Profile() {
       {/* Profile Info */}
       <div className="bg-white p-6 rounded-2xl shadow-md">
         <h2 className="text-xl font-semibold mb-4">Profile Information</h2>
-        
+
         <form onSubmit={saveProfile} className="space-y-4">
           <div>
             <label className="block text-sm font-medium mb-1">Full Name</label>
-            <input name="name" value={form.name} onChange={handleChange} className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-400" />
+            <input
+              name="name"
+              value={form.name}
+              onChange={handleChange}
+              className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-400"
+            />
           </div>
 
           <div>
             <label className="block text-sm font-medium mb-1">Username</label>
-            <input name="username" value={form.username} onChange={handleChange} className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-400" />
+            <input
+              name="username"
+              value={form.username}
+              onChange={handleChange}
+              className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-400"
+            />
           </div>
 
           <div>
             <label className="block text-sm font-medium mb-1">Bio</label>
-            <textarea name="description" value={form.description} onChange={handleChange} rows="4" className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-400" />
+            <textarea
+              name="description"
+              value={form.description}
+              onChange={handleChange}
+              rows="4"
+              className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-400"
+            />
           </div>
 
-          <button type="submit" className="w-full bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium">
+          <button
+            type="submit"
+            className="w-full bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium"
+          >
             Save Profile
           </button>
         </form>
