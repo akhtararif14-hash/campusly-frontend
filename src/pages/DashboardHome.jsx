@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom"; // ✅ NEW
 import api from "../api/axios";
 
 const DashboardHome = () => {
   const { user } = useAuth();
+  const navigate = useNavigate(); // ✅ NEW
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [newPostImage, setNewPostImage] = useState(null);
@@ -29,20 +31,32 @@ const DashboardHome = () => {
     fetchPosts();
   }, []);
 
+  // ✅ Navigate to user profile on avatar/name click
+  const handleProfileClick = (post) => {
+    const postUserId = post.userId?._id || post.userId;
+    if (!postUserId) return;
+
+    // If it's the logged-in user's own post, go to /profile
+    if (user && postUserId === user._id) {
+      navigate("/profile");
+    } else {
+      navigate(`/user/${postUserId}`);
+    }
+  };
+
   // Create new post
   const handleCreatePost = async () => {
     const hasCaption = newPostCaption.trim() !== "";
     const hasImage = !!newPostImage;
 
-    // ✅ Must have at least caption OR image
     if (!hasCaption && !hasImage) {
       alert("Please write something or select a photo");
       return;
     }
 
     const formData = new FormData();
-    if (hasImage) formData.append("image", newPostImage);   // ✅ only if image selected
-    if (hasCaption) formData.append("caption", newPostCaption); // ✅ only if caption written
+    if (hasImage) formData.append("image", newPostImage);
+    if (hasCaption) formData.append("caption", newPostCaption);
 
     try {
       setCreating(true);
@@ -129,7 +143,7 @@ const DashboardHome = () => {
     return postDate.toLocaleDateString();
   };
 
-  // Render avatar for post author
+  // Render avatar — now wrapped in a clickable div
   const renderAvatar = (post, sizeClass = "w-10 h-10") => {
     const profileImage = post.userId?.profileImage || null;
     const name = post.userName || "?";
@@ -138,12 +152,12 @@ const DashboardHome = () => {
         <img
           src={profileImage}
           alt={name}
-          className={`${sizeClass} rounded-full object-cover border-2 border-gray-200`}
+          className={`${sizeClass} rounded-full object-cover border-2 border-gray-200 cursor-pointer hover:opacity-80 transition-opacity`}
         />
       );
     }
     return (
-      <div className={`${sizeClass} rounded-full bg-blue-500 flex items-center justify-center border-2 border-gray-200`}>
+      <div className={`${sizeClass} rounded-full bg-blue-500 flex items-center justify-center border-2 border-gray-200 cursor-pointer hover:opacity-80 transition-opacity`}>
         <span className="text-white font-semibold text-sm">
           {name.charAt(0).toUpperCase()}
         </span>
@@ -165,7 +179,6 @@ const DashboardHome = () => {
       {user && (
         <div className="bg-gray-100 p-4 rounded-2xl shadow-sm">
           <div className="flex gap-3 items-center">
-            {/* Logged-in user avatar */}
             {user.profileImage ? (
               <img src={user.profileImage} alt={user.name} className="w-10 h-10 rounded-full object-cover border-2 border-gray-300 flex-shrink-0" />
             ) : (
@@ -199,7 +212,6 @@ const DashboardHome = () => {
               />
             </label>
 
-            {/* ✅ Enabled if caption OR image exists */}
             <button
               onClick={handleCreatePost}
               disabled={creating || (!newPostCaption.trim() && !newPostImage)}
@@ -209,7 +221,6 @@ const DashboardHome = () => {
             </button>
           </div>
 
-          {/* Image Preview */}
           {preview && (
             <div className="mt-4 flex items-center gap-4 p-3 bg-white rounded-xl">
               <img src={preview} alt="preview" className="w-24 h-24 object-cover rounded-lg" />
@@ -224,7 +235,6 @@ const DashboardHome = () => {
         </div>
       )}
 
-      {/* Login Prompt */}
       {!user && (
         <div className="bg-blue-50 border border-blue-200 p-4 rounded-2xl text-center">
           <p className="text-blue-800">Please login to create posts and interact</p>
@@ -244,13 +254,18 @@ const DashboardHome = () => {
 
               {/* Post Header */}
               <div className="p-4 flex justify-between items-center">
-                <div className="flex items-center gap-3">
+                {/* ✅ Clickable avatar + name */}
+                <div
+                  className="flex items-center gap-3 cursor-pointer"
+                  onClick={() => handleProfileClick(post)}
+                >
                   {renderAvatar(post, "w-10 h-10")}
                   <div>
-                    <p className="font-semibold text-black text-base leading-tight">{post.userName}</p>
+                    <p className="font-semibold text-black text-base leading-tight hover:underline">{post.userName}</p>
                     <p className="text-xs text-gray-500">{formatDate(post.createdAt)}</p>
                   </div>
                 </div>
+
                 {user && (post.userId?._id || post.userId) === user._id && (
                   <button
                     onClick={() => handleDeletePost(post._id)}
@@ -261,7 +276,7 @@ const DashboardHome = () => {
                 )}
               </div>
 
-              {/* ✅ Post Image — only show if image exists */}
+              {/* Post Image */}
               {post.image && (
                 <div className="w-full">
                   <img
@@ -297,14 +312,12 @@ const DashboardHome = () => {
                   </button>
                 </div>
 
-                {/* Caption */}
                 {post.caption && (
                   <p className="mb-3 text-black">
                     <span className="font-semibold">{post.userName}</span>{" "}{post.caption}
                   </p>
                 )}
 
-                {/* Comments Section */}
                 {showComments[post._id] && (
                   <div className="mt-4 pt-4 border-t border-gray-200">
                     {post.comments && post.comments.length > 0 ? (

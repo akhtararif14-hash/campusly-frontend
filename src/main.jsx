@@ -7,6 +7,7 @@ import DashboardLayout from "./components/DashboardLayout.jsx";
 import DashboardHome from "./pages/DashboardHome.jsx";
 import BuySell from "./pages/BuySell.jsx";
 import Profile from "./pages/Profile.jsx";
+import UserProfile from "./pages/UserProfile.jsx"; // ✅ ADD THIS LINE
 import Setting from "./pages/Setting.jsx";
 import Navbar from "./pages/Navbar.jsx";
 import Cart from "./pages/Cart.jsx";
@@ -21,9 +22,6 @@ import Signup from "./pages/Signup.jsx";
 import { AuthProvider } from "./context/AuthContext.jsx";
 import ProtectedRoute from "./routes/ProtectedRoute.jsx";
 
-/* ===========================
-   ROUTER CONFIG
-   =========================== */
 const router = createBrowserRouter([
   // ✅ AUTH ROUTES (PUBLIC)
   {
@@ -50,6 +48,7 @@ const router = createBrowserRouter([
       { path: "cart", element: <Cart /> },
       { path: "checkout", element: <Checkout /> },
       { path: "order-success", element: <OrderSuccess /> },
+      { path: "user/:userId", element: <UserProfile /> }, // ✅ ADD THIS LINE
 
       // ✅ PROTECTED ROUTES
       {
@@ -94,9 +93,6 @@ const router = createBrowserRouter([
   },
 ]);
 
-/* ===========================
-   APP BOOTSTRAP
-   =========================== */
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <AuthProvider>
