@@ -8,7 +8,6 @@ import DashboardHome from "./pages/DashboardHome.jsx";
 import BuySell from "./pages/BuySell.jsx";
 import Profile from "./pages/Profile.jsx";
 import Setting from "./pages/Setting.jsx";
-import Alert from "./pages/Alert.jsx";
 import Navbar from "./pages/Navbar.jsx";
 import Cart from "./pages/Cart.jsx";
 import SellerDashboard from "./pages/seller/SellerDashboard.jsx";
@@ -48,7 +47,6 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <DashboardHome /> },
       { path: "buy-sell", element: <BuySell /> },
-      { path: "alert", element: <Alert /> },
       { path: "cart", element: <Cart /> },
       { path: "checkout", element: <Checkout /> },
       { path: "order-success", element: <OrderSuccess /> },

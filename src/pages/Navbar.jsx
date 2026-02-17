@@ -21,10 +21,6 @@ export default function Navbar() {
             Profile
           </NavLink>
 
-          <NavLink to="/alert" style={navLinkStyles} className="p-1 focus:bg-blue-200 font-semibold text-sm border-1 border-gray-200 rounded-md hover:bg-gray-200">
-            Alert
-          </NavLink>
-
           <NavLink to="/setting" style={navLinkStyles} className="p-1 focus:bg-blue-200 font-semibold border-1 border-gray-200 text-sm rounded-md hover:bg-gray-200 ">
             Setting
           </NavLink>

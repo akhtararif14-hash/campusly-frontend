@@ -31,14 +31,18 @@ const DashboardHome = () => {
 
   // Create new post
   const handleCreatePost = async () => {
-    if (!newPostImage) {
-      alert("Please select an image");
+    const hasCaption = newPostCaption.trim() !== "";
+    const hasImage = !!newPostImage;
+
+    // ✅ Must have at least caption OR image
+    if (!hasCaption && !hasImage) {
+      alert("Please write something or select a photo");
       return;
     }
 
     const formData = new FormData();
-    formData.append("image", newPostImage);
-    formData.append("caption", newPostCaption);
+    if (hasImage) formData.append("image", newPostImage);   // ✅ only if image selected
+    if (hasCaption) formData.append("caption", newPostCaption); // ✅ only if caption written
 
     try {
       setCreating(true);
@@ -58,7 +62,6 @@ const DashboardHome = () => {
   // Delete post
   const handleDeletePost = async (postId) => {
     if (!window.confirm("Delete this post?")) return;
-
     try {
       await api.delete(`/api/feed/post/${postId}`);
       setPosts(posts.filter((p) => p._id !== postId));
@@ -70,11 +73,7 @@ const DashboardHome = () => {
 
   // Like/Unlike post
   const handleLikePost = async (postId) => {
-    if (!user) {
-      alert("Please login to like posts");
-      return;
-    }
-
+    if (!user) { alert("Please login to like posts"); return; }
     try {
       const res = await api.post(`/api/feed/post/${postId}/like`);
       setPosts(
@@ -98,12 +97,7 @@ const DashboardHome = () => {
   const handleAddComment = async (postId) => {
     const text = commentText[postId]?.trim();
     if (!text) return;
-
-    if (!user) {
-      alert("Please login to comment");
-      return;
-    }
-
+    if (!user) { alert("Please login to comment"); return; }
     try {
       const res = await api.post(`/api/feed/post/${postId}/comment`, { text });
       setPosts(
@@ -128,7 +122,6 @@ const DashboardHome = () => {
     const diffMins = Math.floor(diffMs / 60000);
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
-
     if (diffMins < 1) return "just now";
     if (diffMins < 60) return `${diffMins}m ago`;
     if (diffHours < 24) return `${diffHours}h ago`;
@@ -136,12 +129,10 @@ const DashboardHome = () => {
     return postDate.toLocaleDateString();
   };
 
-  // ✅ Helper: render avatar for a post author
+  // Render avatar for post author
   const renderAvatar = (post, sizeClass = "w-10 h-10") => {
-    // After populate, userId becomes an object with profileImage and name
     const profileImage = post.userId?.profileImage || null;
     const name = post.userName || "?";
-
     if (profileImage) {
       return (
         <img
@@ -151,12 +142,8 @@ const DashboardHome = () => {
         />
       );
     }
-
-    // Fallback: colored circle with first letter of name
     return (
-      <div
-        className={`${sizeClass} rounded-full bg-blue-500 flex items-center justify-center border-2 border-gray-200`}
-      >
+      <div className={`${sizeClass} rounded-full bg-blue-500 flex items-center justify-center border-2 border-gray-200`}>
         <span className="text-white font-semibold text-sm">
           {name.charAt(0).toUpperCase()}
         </span>
@@ -177,19 +164,13 @@ const DashboardHome = () => {
       {/* Create Post Section */}
       {user && (
         <div className="bg-gray-100 p-4 rounded-2xl shadow-sm">
-          {/* ✅ Show logged-in user's avatar in post creator */}
           <div className="flex gap-3 items-center">
+            {/* Logged-in user avatar */}
             {user.profileImage ? (
-              <img
-                src={user.profileImage}
-                alt={user.name}
-                className="w-10 h-10 rounded-full object-cover border-2 border-gray-300 flex-shrink-0"
-              />
+              <img src={user.profileImage} alt={user.name} className="w-10 h-10 rounded-full object-cover border-2 border-gray-300 flex-shrink-0" />
             ) : (
               <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
-                <span className="text-white font-semibold text-sm">
-                  {user.name?.charAt(0).toUpperCase() || "?"}
-                </span>
+                <span className="text-white font-semibold text-sm">{user.name?.charAt(0).toUpperCase() || "?"}</span>
               </div>
             )}
 
@@ -198,6 +179,7 @@ const DashboardHome = () => {
               placeholder="What's on your mind?"
               value={newPostCaption}
               onChange={(e) => setNewPostCaption(e.target.value)}
+              onKeyPress={(e) => { if (e.key === "Enter") handleCreatePost(); }}
               className="flex-1 bg-white border border-gray-300 outline-none px-4 py-3 rounded-full text-black focus:ring-2 focus:ring-blue-400"
             />
 
@@ -217,9 +199,10 @@ const DashboardHome = () => {
               />
             </label>
 
+            {/* ✅ Enabled if caption OR image exists */}
             <button
               onClick={handleCreatePost}
-              disabled={creating || !newPostImage}
+              disabled={creating || (!newPostCaption.trim() && !newPostImage)}
               className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {creating ? "Posting..." : "Post"}
@@ -229,17 +212,9 @@ const DashboardHome = () => {
           {/* Image Preview */}
           {preview && (
             <div className="mt-4 flex items-center gap-4 p-3 bg-white rounded-xl">
-              <img
-                src={preview}
-                alt="preview"
-                className="w-24 h-24 object-cover rounded-lg"
-              />
+              <img src={preview} alt="preview" className="w-24 h-24 object-cover rounded-lg" />
               <button
-                onClick={() => {
-                  setNewPostImage(null);
-                  setPreview(null);
-                  setNewPostCaption("");
-                }}
+                onClick={() => { setNewPostImage(null); setPreview(null); }}
                 className="text-red-600 hover:text-red-700 text-sm font-medium"
               >
                 ✕ Remove
@@ -249,7 +224,7 @@ const DashboardHome = () => {
         </div>
       )}
 
-      {/* Login Prompt for Non-Users */}
+      {/* Login Prompt */}
       {!user && (
         <div className="bg-blue-50 border border-blue-200 p-4 rounded-2xl text-center">
           <p className="text-blue-800">Please login to create posts and interact</p>
@@ -267,7 +242,7 @@ const DashboardHome = () => {
           posts.map((post) => (
             <div key={post._id} className="bg-white rounded-2xl overflow-hidden shadow-md border border-gray-200">
 
-              {/* ✅ Post Header — avatar + name + date */}
+              {/* Post Header */}
               <div className="p-4 flex justify-between items-center">
                 <div className="flex items-center gap-3">
                   {renderAvatar(post, "w-10 h-10")}
@@ -276,7 +251,6 @@ const DashboardHome = () => {
                     <p className="text-xs text-gray-500">{formatDate(post.createdAt)}</p>
                   </div>
                 </div>
-
                 {user && (post.userId?._id || post.userId) === user._id && (
                   <button
                     onClick={() => handleDeletePost(post._id)}
@@ -287,14 +261,16 @@ const DashboardHome = () => {
                 )}
               </div>
 
-              {/* Post Image */}
-              <div className="w-full">
-                <img
-                  src={post.image}
-                  alt={post.caption || "Post image"}
-                  className="w-full h-auto object-cover"
-                />
-              </div>
+              {/* ✅ Post Image — only show if image exists */}
+              {post.image && (
+                <div className="w-full">
+                  <img
+                    src={post.image}
+                    alt={post.caption || "Post image"}
+                    className="w-full h-auto object-cover"
+                  />
+                </div>
+              )}
 
               {/* Post Actions */}
               <div className="p-4">
@@ -303,9 +279,7 @@ const DashboardHome = () => {
                     onClick={() => handleLikePost(post._id)}
                     disabled={!user}
                     className={`flex items-center gap-2 transition-colors ${
-                      user && (post.likes || []).includes(user._id)
-                        ? "text-red-500"
-                        : "text-gray-700 hover:text-red-500"
+                      user && (post.likes || []).includes(user._id) ? "text-red-500" : "text-gray-700 hover:text-red-500"
                     } ${!user ? "opacity-50 cursor-not-allowed" : ""}`}
                   >
                     <span className="text-2xl">
@@ -315,12 +289,7 @@ const DashboardHome = () => {
                   </button>
 
                   <button
-                    onClick={() =>
-                      setShowComments({
-                        ...showComments,
-                        [post._id]: !showComments[post._id],
-                      })
-                    }
+                    onClick={() => setShowComments({ ...showComments, [post._id]: !showComments[post._id] })}
                     className="flex items-center gap-2 text-gray-700 hover:text-blue-500 transition-colors"
                   >
                     <span className="text-2xl">💬</span>
@@ -331,8 +300,7 @@ const DashboardHome = () => {
                 {/* Caption */}
                 {post.caption && (
                   <p className="mb-3 text-black">
-                    <span className="font-semibold">{post.userName}</span>{" "}
-                    {post.caption}
+                    <span className="font-semibold">{post.userName}</span>{" "}{post.caption}
                   </p>
                 )}
 
@@ -343,8 +311,7 @@ const DashboardHome = () => {
                       <div className="space-y-2 mb-4">
                         {post.comments.map((comment) => (
                           <div key={comment._id} className="text-sm text-black">
-                            <span className="font-semibold">{comment.userName}</span>{" "}
-                            {comment.text}
+                            <span className="font-semibold">{comment.userName}</span>{" "}{comment.text}
                           </div>
                         ))}
                       </div>
@@ -352,24 +319,14 @@ const DashboardHome = () => {
                       <p className="text-gray-500 text-sm mb-4">No comments yet</p>
                     )}
 
-                    {/* Add Comment */}
                     {user ? (
                       <div className="flex gap-2">
                         <input
                           type="text"
                           placeholder="Add a comment..."
                           value={commentText[post._id] || ""}
-                          onChange={(e) =>
-                            setCommentText({
-                              ...commentText,
-                              [post._id]: e.target.value,
-                            })
-                          }
-                          onKeyPress={(e) => {
-                            if (e.key === "Enter") {
-                              handleAddComment(post._id);
-                            }
-                          }}
+                          onChange={(e) => setCommentText({ ...commentText, [post._id]: e.target.value })}
+                          onKeyPress={(e) => { if (e.key === "Enter") handleAddComment(post._id); }}
                           className="flex-1 bg-gray-50 border border-gray-300 outline-none rounded-full px-4 py-2 text-black focus:ring-2 focus:ring-blue-400"
                         />
                         <button
