@@ -12,18 +12,7 @@ export default function Profile() {
   const navigate = useNavigate();
   const [message, setMessage] = useState(null);
 
-  // Display profile picture
-{user?.profileImage ? (
-  <img 
-    src={user.profileImage} 
-    alt={user.name}
-    className="w-10 h-10 rounded-full object-cover"
-  />
-) : (
-  <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center">
-    <span>👤</span>
-  </div>
-)}
+
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -85,6 +74,7 @@ export default function Profile() {
       setUploading(true);
       const res = await api.put('/api/user/me/profile-image', formData);
       updateUser(res.data);
+      setImagePreview(res.data.profileImage);
       setProfileImage(null);
       showMessage('Profile picture updated!', 'success');
       
@@ -100,7 +90,9 @@ export default function Profile() {
   const saveProfile = async (e) => {
     e.preventDefault();
     try {
-      const res = await api.put("/api/user/me", form);
+     const res = await api.put('/api/user/me/profile-image', formData, {
+  headers: { 'Content-Type': 'multipart/form-data' }
+});
       updateUser(res.data);
       showMessage("Profile updated!", "success");
     } catch (err) {
