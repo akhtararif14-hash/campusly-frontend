@@ -289,6 +289,13 @@ const DashboardHome = () => {
 
               {/* Post Actions */}
               <div className="p-4">
+                
+
+                {post.caption && (
+                  <p className="mb-3 text-black">
+                    <span className="font-semibold">{post.userName}</span>{" "}{post.caption}
+                  </p>
+                )}
                 <div className="flex gap-4 mb-3">
                   <button
                     onClick={() => handleLikePost(post._id)}
@@ -311,12 +318,6 @@ const DashboardHome = () => {
                     <span className="text-sm font-medium">{(post.comments || []).length}</span>
                   </button>
                 </div>
-
-                {post.caption && (
-                  <p className="mb-3 text-black">
-                    <span className="font-semibold">{post.userName}</span>{" "}{post.caption}
-                  </p>
-                )}
 
                 {showComments[post._id] && (
                   <div className="mt-4 pt-4 border-t border-gray-200">
