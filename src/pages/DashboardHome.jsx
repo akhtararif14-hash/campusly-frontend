@@ -17,9 +17,7 @@ const DashboardHome = () => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        console.log('🔵 Fetching posts...');
         const res = await api.get("/api/feed/posts");
-        console.log('✅ Posts received:', res.data);
         setPosts(Array.isArray(res.data) ? res.data : []);
       } catch (err) {
         console.error("❌ Error fetching posts:", err);
@@ -138,6 +136,34 @@ const DashboardHome = () => {
     return postDate.toLocaleDateString();
   };
 
+  // ✅ Helper: render avatar for a post author
+  const renderAvatar = (post, sizeClass = "w-10 h-10") => {
+    // After populate, userId becomes an object with profileImage and name
+    const profileImage = post.userId?.profileImage || null;
+    const name = post.userName || "?";
+
+    if (profileImage) {
+      return (
+        <img
+          src={profileImage}
+          alt={name}
+          className={`${sizeClass} rounded-full object-cover border-2 border-gray-200`}
+        />
+      );
+    }
+
+    // Fallback: colored circle with first letter of name
+    return (
+      <div
+        className={`${sizeClass} rounded-full bg-blue-500 flex items-center justify-center border-2 border-gray-200`}
+      >
+        <span className="text-white font-semibold text-sm">
+          {name.charAt(0).toUpperCase()}
+        </span>
+      </div>
+    );
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
@@ -148,10 +174,25 @@ const DashboardHome = () => {
 
   return (
     <div className="space-y-6 pb-14">
-      {/* SINGLE Create Post Section */}
+      {/* Create Post Section */}
       {user && (
         <div className="bg-gray-100 p-4 rounded-2xl shadow-sm">
+          {/* ✅ Show logged-in user's avatar in post creator */}
           <div className="flex gap-3 items-center">
+            {user.profileImage ? (
+              <img
+                src={user.profileImage}
+                alt={user.name}
+                className="w-10 h-10 rounded-full object-cover border-2 border-gray-300 flex-shrink-0"
+              />
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
+                <span className="text-white font-semibold text-sm">
+                  {user.name?.charAt(0).toUpperCase() || "?"}
+                </span>
+              </div>
+            )}
+
             <input
               type="text"
               placeholder="What's on your mind?"
@@ -159,7 +200,7 @@ const DashboardHome = () => {
               onChange={(e) => setNewPostCaption(e.target.value)}
               className="flex-1 bg-white border border-gray-300 outline-none px-4 py-3 rounded-full text-black focus:ring-2 focus:ring-blue-400"
             />
-            
+
             <label className="cursor-pointer bg-gray-200 hover:bg-gray-300 text-black text-sm px-4 py-3 rounded-full transition-colors">
               📷 Photo
               <input
@@ -225,13 +266,18 @@ const DashboardHome = () => {
         ) : (
           posts.map((post) => (
             <div key={post._id} className="bg-white rounded-2xl overflow-hidden shadow-md border border-gray-200">
-              {/* Post Header */}
+
+              {/* ✅ Post Header — avatar + name + date */}
               <div className="p-4 flex justify-between items-center">
-                <div>
-                  <p className="font-semibold text-black text-lg">{post.userName}</p>
-                  <p className="text-xs text-gray-500">{formatDate(post.createdAt)}</p>
+                <div className="flex items-center gap-3">
+                  {renderAvatar(post, "w-10 h-10")}
+                  <div>
+                    <p className="font-semibold text-black text-base leading-tight">{post.userName}</p>
+                    <p className="text-xs text-gray-500">{formatDate(post.createdAt)}</p>
+                  </div>
                 </div>
-                {user && post.userId === user._id && (
+
+                {user && (post.userId?._id || post.userId) === user._id && (
                   <button
                     onClick={() => handleDeletePost(post._id)}
                     className="text-red-600 hover:text-red-700 text-sm font-medium px-3 py-1 rounded-lg hover:bg-red-50 transition-colors"
