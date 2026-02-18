@@ -21,6 +21,9 @@ import Signup from "./pages/Signup.jsx";
 
 import { AuthProvider } from "./context/AuthContext.jsx";
 import ProtectedRoute from "./routes/ProtectedRoute.jsx";
+import Chat from "./pages/Chat.jsx";
+import Messages from "./pages/Messages.jsx";
+
 
 const router = createBrowserRouter([
   // ✅ AUTH ROUTES (PUBLIC)
@@ -28,6 +31,22 @@ const router = createBrowserRouter([
     path: "/login",
     element: <Login />,
   },
+  {
+  path: "/Chat/:userId",
+  element: (
+    <ProtectedRoute>
+      <Chat />
+    </ProtectedRoute>
+  ),
+},
+{
+  path: "/messages",
+  element: (
+    <ProtectedRoute>
+      <Messages />
+    </ProtectedRoute>
+  ),
+},
   {
     path: "/signup",
     element: <Signup />,
