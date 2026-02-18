@@ -96,8 +96,9 @@ export default function Profile() {
   try {
     if (profileImage) await uploadProfileImage();
     const res = await api.put("/api/user/me", form);
-    console.log("✅ Save response:", res.data); // ← add this
-    console.log("✅ Branch in response:", res.data.branch); // ← add this
+    console.log("📦 form being sent:", form);
+    console.log("📦 response from server:", res.data);
+    console.log("📦 branch in response:", res.data.branch);
     updateUser(res.data);
     showMessage("Profile updated!", "success");
     setIsEditing(false);

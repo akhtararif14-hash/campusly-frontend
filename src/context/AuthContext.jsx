@@ -22,10 +22,12 @@ export const AuthProvider = ({ children }) => {
       .get("/api/user/me", {
         headers: { Authorization: `Bearer ${token}` },
       })
-      .then((res) => {
-        setUser(res.data);
-        localStorage.setItem("user", JSON.stringify(res.data));
-      })
+     .then((res) => {
+  console.log("🔄 Restored user on refresh:", res.data);
+  console.log("🔄 Branch on refresh:", res.data.branch);
+  setUser(res.data);
+  localStorage.setItem("user", JSON.stringify(res.data));
+})
       .catch(() => {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
