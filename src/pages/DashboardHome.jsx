@@ -131,17 +131,31 @@ const DashboardHome = () => {
     return postDate.toLocaleDateString();
   };
 
-  // ✅ FIXED: properly reads profileImage from populated userId object
-  const renderAvatar = (post, sizeClass = "w-10 h-10") => {
-    const profileImage =
-      typeof post.userId === "object"
-        ? post.userId?.profileImage
-        : null;
+  // ✅ FIXED: checks all possible locations for profileImage
+  const getPostProfileImage = (post) => {
+    // If userId is a populated object with profileImage
+    if (typeof post.userId === "object" && post.userId?.profileImage) {
+      return post.userId.profileImage;
+    }
+    // If it's the current user's post, use their profileImage from context
+    const postUserId = post.userId?._id || post.userId;
+    if (user && postUserId?.toString() === user._id?.toString() && user.profileImage) {
+      return user.profileImage;
+    }
+    return null;
+  };
 
-    const name =
-      typeof post.userId === "object"
-        ? post.userId?.name
-        : post.userName || "?";
+  // ✅ FIXED: checks all possible locations for name
+  const getPostName = (post) => {
+    if (typeof post.userId === "object" && post.userId?.name) {
+      return post.userId.name;
+    }
+    return post.userName || "Unknown";
+  };
+
+  const renderAvatar = (post, sizeClass = "w-10 h-10") => {
+    const profileImage = getPostProfileImage(post);
+    const name = getPostName(post);
 
     if (profileImage) {
       return (
@@ -154,22 +168,12 @@ const DashboardHome = () => {
     }
 
     return (
-      <div
-        className={`${sizeClass} rounded-full bg-blue-500 flex items-center justify-center border-2 border-gray-200 cursor-pointer hover:opacity-80 transition-opacity`}
-      >
+      <div className={`${sizeClass} rounded-full bg-blue-500 flex items-center justify-center border-2 border-gray-200 cursor-pointer hover:opacity-80 transition-opacity`}>
         <span className="text-white font-semibold text-sm">
           {(name || "?").charAt(0).toUpperCase()}
         </span>
       </div>
     );
-  };
-
-  // ✅ FIXED: properly reads name from populated userId object
-  const getPostName = (post) => {
-    if (typeof post.userId === "object" && post.userId?.name) {
-      return post.userId.name;
-    }
-    return post.userName || "Unknown";
   };
 
   if (loading) {
@@ -185,53 +189,60 @@ const DashboardHome = () => {
       {/* Create Post */}
       {user && (
         <div className="bg-gray-100 p-4 rounded-2xl shadow-sm">
-          <div className="flex gap-3 items-center">
+          <div className="flex gap-3 items-start">
             {user.profileImage ? (
               <img
                 src={user.profileImage}
                 alt={user.name}
-                className="w-10 h-10 rounded-full object-cover border-2 border-gray-300 flex-shrink-0"
+                className="w-10 h-10 rounded-full object-cover border-2 border-gray-300 flex-shrink-0 mt-1"
               />
             ) : (
-              <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0 mt-1">
                 <span className="text-white font-semibold text-sm">
                   {user.name?.charAt(0).toUpperCase() || "?"}
                 </span>
               </div>
             )}
 
-            <input
-              type="text"
-              placeholder="What's on your mind?"
-              value={newPostCaption}
-              onChange={(e) => setNewPostCaption(e.target.value)}
-              onKeyPress={(e) => { if (e.key === "Enter") handleCreatePost(); }}
-              className="flex-1 bg-white border border-gray-300 outline-none px-4 py-3 rounded-full text-black focus:ring-2 focus:ring-blue-400"
-            />
-
-            <label className="cursor-pointer bg-gray-200 hover:bg-gray-300 text-black text-sm px-4 py-3 rounded-full transition-colors">
-              📷 Photo
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    setNewPostImage(file);
-                    setPreview(URL.createObjectURL(file));
-                  }
+            <div className="flex-1 flex flex-col gap-2">
+              {/* ✅ CHANGED: input → textarea, removed onKeyPress */}
+              <textarea
+                placeholder="What's on your mind?"
+                value={newPostCaption}
+                onChange={(e) => setNewPostCaption(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && e.ctrlKey) handleCreatePost();
                 }}
-                className="hidden"
+                rows={2}
+                className="w-full bg-white border border-gray-300 outline-none px-4 py-3 rounded-2xl text-black focus:ring-2 focus:ring-blue-400 resize-none"
               />
-            </label>
 
-            <button
-              onClick={handleCreatePost}
-              disabled={creating || (!newPostCaption.trim() && !newPostImage)}
-              className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {creating ? "Posting..." : "Post"}
-            </button>
+              <div className="flex gap-2 justify-end">
+                <label className="cursor-pointer bg-gray-200 hover:bg-gray-300 text-black text-sm px-4 py-2 rounded-full transition-colors">
+                  📷 Photo
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setNewPostImage(file);
+                        setPreview(URL.createObjectURL(file));
+                      }
+                    }}
+                    className="hidden"
+                  />
+                </label>
+
+                <button
+                  onClick={handleCreatePost}
+                  disabled={creating || (!newPostCaption.trim() && !newPostImage)}
+                  className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                >
+                  {creating ? "Posting..." : "Post"}
+                </button>
+              </div>
+            </div>
           </div>
 
           {preview && (
@@ -302,7 +313,7 @@ const DashboardHome = () => {
               {/* Caption + Actions */}
               <div className="p-4">
                 {post.caption && (
-                  <p className="mb-3 text-black">
+                  <p className="mb-3 text-black whitespace-pre-wrap">
                     <span className="font-semibold">{getPostName(post)}</span>{" "}{post.caption}
                   </p>
                 )}
