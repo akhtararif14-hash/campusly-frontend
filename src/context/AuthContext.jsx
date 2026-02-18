@@ -9,21 +9,22 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-
     if (!token) {
       setReady(true);
       return;
     }
 
     api
-      .get("/api/auth/me", {
+      .get("/api/user/me", {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
-        setUser(res.data.user); // ✅ auth/me returns { success, user }
+        setUser(res.data); // ✅ /api/user/me returns full user with profileImage
+        localStorage.setItem("user", JSON.stringify(res.data)); // ✅ persist it
       })
       .catch(() => {
         localStorage.removeItem("token");
+        localStorage.removeItem("user");
         setUser(null);
       })
       .finally(() => {
@@ -33,16 +34,19 @@ export const AuthProvider = ({ children }) => {
 
   const login = ({ token, user }) => {
     localStorage.setItem("token", token);
+    localStorage.setItem("user", JSON.stringify(user)); // ✅ persist on login
     setUser(user);
   };
 
   const logout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("user"); // ✅ clear on logout
     setUser(null);
   };
 
   const updateUser = (updatedUser) => {
     setUser(updatedUser);
+    localStorage.setItem("user", JSON.stringify(updatedUser)); // ✅ persist on update
   };
 
   return (
