@@ -23,7 +23,7 @@ export default function UserProfile() {
       try {
         const [profileRes, postsRes] = await Promise.all([
           api.get(`/api/user/${userId}`),
-          api.get(`/api/user/${userId}/posts`),
+         api.get(`/api/feed/user/${userId}/posts`),
         ]);
         setProfile(profileRes.data);
         setPosts(Array.isArray(postsRes.data) ? postsRes.data : []);
