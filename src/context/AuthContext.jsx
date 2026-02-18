@@ -7,9 +7,6 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [ready, setReady] = useState(false);
 
-  /* ===========================
-     🔁 RESTORE SESSION ON LOAD
-     =========================== */
   useEffect(() => {
     const token = localStorage.getItem("token");
 
@@ -19,14 +16,13 @@ export const AuthProvider = ({ children }) => {
     }
 
     api
-      .get("/api/user/me", {
+      .get("/api/auth/me", {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
-        setUser(res.data);
+        setUser(res.data.user); // ✅ auth/me returns { success, user }
       })
       .catch(() => {
-        // token invalid / expired
         localStorage.removeItem("token");
         setUser(null);
       })
@@ -35,39 +31,22 @@ export const AuthProvider = ({ children }) => {
       });
   }, []);
 
-  /* ===========================
-     🔐 LOGIN
-     =========================== */
   const login = ({ token, user }) => {
     localStorage.setItem("token", token);
     setUser(user);
   };
 
-  /* ===========================
-     🚪 LOGOUT
-     =========================== */
   const logout = () => {
     localStorage.removeItem("token");
     setUser(null);
   };
 
-  /* ===========================
-     🔁 UPDATE USER (ROLE, NAME)
-     =========================== */
   const updateUser = (updatedUser) => {
     setUser(updatedUser);
   };
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        ready,
-        login,
-        logout,
-        updateUser,
-      }}
-    >
+    <AuthContext.Provider value={{ user, ready, login, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );
@@ -75,8 +54,6 @@ export const AuthProvider = ({ children }) => {
 
 export const useAuth = () => {
   const ctx = useContext(AuthContext);
-  if (!ctx) {
-    throw new Error("useAuth must be used inside AuthProvider");
-  }
+  if (!ctx) throw new Error("useAuth must be used inside AuthProvider");
   return ctx;
 };
