@@ -9,6 +9,7 @@ export default function Profile() {
   const [profileImage, setProfileImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const navigate = useNavigate();
   const [message, setMessage] = useState(null);
 
@@ -61,26 +62,18 @@ export default function Profile() {
   };
 
   const uploadProfileImage = async () => {
-    if (!profileImage) {
-      showMessage("Please select an image first", "error");
-      return;
-    }
-
+    if (!profileImage) return;
     const formData = new FormData();
     formData.append("profileImage", profileImage);
-
     try {
       setUploading(true);
       const res = await api.put("/api/user/me/profile-image", formData, {
-        headers: { "Content-Type": "multipart/form-data" }, // ✅ header is here in the RIGHT function
+        headers: { "Content-Type": "multipart/form-data" },
       });
       updateUser(res.data);
-      setImagePreview(res.data.profileImage); // ✅ sync preview with Cloudinary URL
+      setImagePreview(res.data.profileImage);
       setProfileImage(null);
       showMessage("Profile picture updated!", "success");
-
-      const fileInput = document.querySelector('input[type="file"]');
-      if (fileInput) fileInput.value = "";
     } catch (err) {
       showMessage(err.response?.data?.message || "Failed to upload", "error");
     } finally {
@@ -88,16 +81,26 @@ export default function Profile() {
     }
   };
 
-  // ✅ FIXED: was accidentally calling the image upload endpoint — now correctly saves form data
   const saveProfile = async (e) => {
     e.preventDefault();
     try {
+      // upload image if changed
+      if (profileImage) {
+        await uploadProfileImage();
+      }
       const res = await api.put("/api/user/me", form);
       updateUser(res.data);
       showMessage("Profile updated!", "success");
+      setIsEditing(false);
     } catch (err) {
       showMessage(err?.response?.data?.message || "Failed to update", "error");
     }
+  };
+
+  const cancelEdit = () => {
+    setIsEditing(false);
+    setProfileImage(null);
+    setImagePreview(user?.profileImage || null);
   };
 
   return (
@@ -117,102 +120,112 @@ export default function Profile() {
         </div>
       )}
 
-      {/* Profile Picture */}
-      <div className="bg-white p-6 rounded-2xl shadow-md mb-6">
-        <h2 className="text-xl font-semibold mb-4">Profile Picture</h2>
-
-        <div className="flex flex-col md:flex-row items-center gap-6">
-          <div>
-            {imagePreview ? (
-              <img
-                src={imagePreview}
-                alt="Profile"
-                className="w-32 h-32 rounded-full object-cover border-4 border-blue-200"
-              />
-            ) : (
-              <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center border-4 border-gray-300">
-                <span className="text-4xl">👤</span>
-              </div>
-            )}
-          </div>
-
-          <div className="flex-1">
-            <label className="block cursor-pointer">
-              <div className="bg-gray-100 hover:bg-gray-200 border-2 border-dashed rounded-lg p-4 text-center">
-                <span className="text-2xl block mb-2">📷</span>
-                <span className="text-sm text-gray-600">Click to select profile picture</span>
-                <p className="text-xs text-gray-500 mt-1">JPG, PNG, GIF • Max 5MB</p>
-              </div>
-              <input type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
-            </label>
-
-            {profileImage && (
-              <div className="mt-3 flex gap-2">
-                <button
-                  onClick={uploadProfileImage}
-                  disabled={uploading}
-                  className="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg disabled:opacity-50"
-                >
-                  {uploading ? "Uploading..." : "Upload"}
-                </button>
-                <button
-                  onClick={() => {
-                    setProfileImage(null);
-                    setImagePreview(user?.profileImage || null);
-                  }}
-                  className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg"
-                >
-                  Cancel
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Profile Info */}
       <div className="bg-white p-6 rounded-2xl shadow-md">
-        <h2 className="text-xl font-semibold mb-4">Profile Information</h2>
+        {/* Profile Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-5">
+            {/* Avatar */}
+            <div className="relative">
+              {imagePreview ? (
+                <img
+                  src={imagePreview}
+                  alt="Profile"
+                  className="w-24 h-24 rounded-full object-cover border-4 border-blue-200"
+                />
+              ) : (
+                <div className="w-24 h-24 rounded-full bg-blue-500 flex items-center justify-center border-4 border-blue-200">
+                  <span className="text-white text-3xl font-bold">
+                    {form.name?.charAt(0).toUpperCase() || "?"}
+                  </span>
+                </div>
+              )}
 
-        <form onSubmit={saveProfile} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">Full Name</label>
-            <input
-              name="name"
-              value={form.name}
-              onChange={handleChange}
-              className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-400"
-            />
+              {/* Camera icon overlay when editing */}
+              {isEditing && (
+                <label className="absolute bottom-0 right-0 bg-blue-500 hover:bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center cursor-pointer shadow-md">
+                  <span className="text-sm">📷</span>
+                  <input type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
+                </label>
+              )}
+            </div>
+
+            {/* Name & username */}
+            <div>
+              <h2 className="text-xl font-bold text-black">{form.name || "Your Name"}</h2>
+              {form.username && <p className="text-gray-500 text-sm">@{form.username}</p>}
+              {form.description && !isEditing && (
+                <p className="text-gray-600 text-sm mt-1">{form.description}</p>
+              )}
+            </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-1">Username</label>
-            <input
-              name="username"
-              value={form.username}
-              onChange={handleChange}
-              className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-400"
-            />
-          </div>
+          {/* Edit button */}
+          {!isEditing && (
+            <button
+              onClick={() => setIsEditing(true)}
+              className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium"
+            >
+              ✏️ Edit Profile
+            </button>
+          )}
+        </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-1">Bio</label>
-            <textarea
-              name="description"
-              value={form.description}
-              onChange={handleChange}
-              rows="4"
-              className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-400"
-            />
-          </div>
+        {/* Edit Form — only shown when editing */}
+        {isEditing && (
+          <form onSubmit={saveProfile} className="space-y-4 border-t pt-5">
+            {profileImage && (
+              <p className="text-xs text-blue-600">✅ New photo selected — will upload on save</p>
+            )}
 
-          <button
-            type="submit"
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium"
-          >
-            Save Profile
-          </button>
-        </form>
+            <div>
+              <label className="block text-sm font-medium mb-1">Full Name</label>
+              <input
+                name="name"
+                value={form.name}
+                onChange={handleChange}
+                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-400"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Username</label>
+              <input
+                name="username"
+                value={form.username}
+                onChange={handleChange}
+                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-400"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Bio</label>
+              <textarea
+                name="description"
+                value={form.description}
+                onChange={handleChange}
+                rows="3"
+                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-400"
+              />
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                type="submit"
+                disabled={uploading}
+                className="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium disabled:opacity-50"
+              >
+                {uploading ? "Saving..." : "Save Changes"}
+              </button>
+              <button
+                type="button"
+                onClick={cancelEdit}
+                className="px-6 py-3 bg-gray-200 hover:bg-gray-300 rounded-lg font-medium"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        )}
       </div>
     </div>
   );
