@@ -4,7 +4,11 @@ import api from "../api/axios";
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  // ✅ Load from localStorage instantly on refresh
+  const [user, setUser] = useState(() => {
+    const saved = localStorage.getItem("user");
+    return saved ? JSON.parse(saved) : null;
+  });
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
@@ -19,8 +23,8 @@ export const AuthProvider = ({ children }) => {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
-        setUser(res.data); // ✅ /api/user/me returns full user with profileImage
-        localStorage.setItem("user", JSON.stringify(res.data)); // ✅ persist it
+        setUser(res.data);
+        localStorage.setItem("user", JSON.stringify(res.data));
       })
       .catch(() => {
         localStorage.removeItem("token");
@@ -34,19 +38,19 @@ export const AuthProvider = ({ children }) => {
 
   const login = ({ token, user }) => {
     localStorage.setItem("token", token);
-    localStorage.setItem("user", JSON.stringify(user)); // ✅ persist on login
+    localStorage.setItem("user", JSON.stringify(user));
     setUser(user);
   };
 
   const logout = () => {
     localStorage.removeItem("token");
-    localStorage.removeItem("user"); // ✅ clear on logout
+    localStorage.removeItem("user");
     setUser(null);
   };
 
   const updateUser = (updatedUser) => {
     setUser(updatedUser);
-    localStorage.setItem("user", JSON.stringify(updatedUser)); // ✅ persist on update
+    localStorage.setItem("user", JSON.stringify(updatedUser));
   };
 
   return (

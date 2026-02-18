@@ -105,8 +105,8 @@ export default function DashboardLayout() {
   // ================= SIDEBAR =================
 
   const sidebarLinks = [
-    { name: "Home", path: "/", imgsrc: "/images/home.png" },
-    { name: "Campus Shop", path: "/buy-sell", imgsrc: "/images/shoppingcart.png" },
+    { name: "Home", path: "/", imgsrc: "/images/home.svg" },
+    { name: "Campus Shop", path: "/buy-sell", imgsrc: "/images/cart.svg" },
     { name: "Timetable", path: "/timetable", imgsrc: "/images/timetable.svg" },
 
     ...(user && (user.role === "seller" || user.role === "admin")
