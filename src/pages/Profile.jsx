@@ -10,6 +10,8 @@ export default function Profile() {
   const [imagePreview, setImagePreview] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [posts, setPosts] = useState([]);
+  const [postsLoading, setPostsLoading] = useState(true);
   const navigate = useNavigate();
   const [message, setMessage] = useState(null);
 
@@ -25,8 +27,21 @@ export default function Profile() {
         if (res.data.profileImage) {
           setImagePreview(res.data.profileImage);
         }
+
+        // Fetch this user's posts
+        if (res.data._id) {
+          try {
+            const postsRes = await api.get(`/api/feed/user/${res.data._id}/posts`);
+            setPosts(Array.isArray(postsRes.data) ? postsRes.data : []);
+          } catch {
+            setPosts([]);
+          } finally {
+            setPostsLoading(false);
+          }
+        }
       } catch (err) {
         console.error("Failed to fetch profile:", err);
+        setPostsLoading(false);
       }
     };
     fetchProfile();
@@ -84,16 +99,24 @@ export default function Profile() {
   const saveProfile = async (e) => {
     e.preventDefault();
     try {
-      // upload image if changed
-      if (profileImage) {
-        await uploadProfileImage();
-      }
+      if (profileImage) await uploadProfileImage();
       const res = await api.put("/api/user/me", form);
       updateUser(res.data);
       showMessage("Profile updated!", "success");
       setIsEditing(false);
     } catch (err) {
       showMessage(err?.response?.data?.message || "Failed to update", "error");
+    }
+  };
+
+  const handleDeletePost = async (postId) => {
+    if (!window.confirm("Delete this post?")) return;
+    try {
+      await api.delete(`/api/feed/post/${postId}`);
+      setPosts((prev) => prev.filter((p) => p._id !== postId));
+      showMessage("Post deleted!", "success");
+    } catch {
+      showMessage("Failed to delete post", "error");
     }
   };
 
@@ -105,6 +128,7 @@ export default function Profile() {
 
   return (
     <div className="p-6 max-w-2xl mx-auto">
+      {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold">My Profile</h1>
         <button onClick={() => navigate("/")} className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg">
@@ -120,8 +144,8 @@ export default function Profile() {
         </div>
       )}
 
-      <div className="bg-white p-6 rounded-2xl shadow-md">
-        {/* Profile Header */}
+      {/* Profile Card */}
+      <div className="bg-white p-6 rounded-2xl shadow-md mb-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-5">
             {/* Avatar */}
@@ -139,8 +163,6 @@ export default function Profile() {
                   </span>
                 </div>
               )}
-
-              {/* Camera icon overlay when editing */}
               {isEditing && (
                 <label className="absolute bottom-0 right-0 bg-blue-500 hover:bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center cursor-pointer shadow-md">
                   <span className="text-sm">📷</span>
@@ -156,10 +178,10 @@ export default function Profile() {
               {form.description && !isEditing && (
                 <p className="text-gray-600 text-sm mt-1">{form.description}</p>
               )}
+              <p className="text-gray-400 text-xs mt-1">{posts.length} posts</p>
             </div>
           </div>
 
-          {/* Edit button */}
           {!isEditing && (
             <button
               onClick={() => setIsEditing(true)}
@@ -170,13 +192,12 @@ export default function Profile() {
           )}
         </div>
 
-        {/* Edit Form — only shown when editing */}
+        {/* Edit Form */}
         {isEditing && (
           <form onSubmit={saveProfile} className="space-y-4 border-t pt-5">
             {profileImage && (
               <p className="text-xs text-blue-600">✅ New photo selected — will upload on save</p>
             )}
-
             <div>
               <label className="block text-sm font-medium mb-1">Full Name</label>
               <input
@@ -186,7 +207,6 @@ export default function Profile() {
                 className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-400"
               />
             </div>
-
             <div>
               <label className="block text-sm font-medium mb-1">Username</label>
               <input
@@ -196,7 +216,6 @@ export default function Profile() {
                 className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-400"
               />
             </div>
-
             <div>
               <label className="block text-sm font-medium mb-1">Bio</label>
               <textarea
@@ -207,7 +226,6 @@ export default function Profile() {
                 className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-400"
               />
             </div>
-
             <div className="flex gap-3">
               <button
                 type="submit"
@@ -227,6 +245,68 @@ export default function Profile() {
           </form>
         )}
       </div>
+
+      {/* My Posts */}
+      <h2 className="text-lg font-semibold mb-4 text-black">My Posts</h2>
+
+      {postsLoading ? (
+        <div className="text-center py-10 text-gray-500">Loading posts...</div>
+      ) : posts.length === 0 ? (
+        <div className="text-center py-16 bg-gray-50 rounded-2xl">
+          <p className="text-gray-500">You haven't posted anything yet</p>
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {posts.map((post) => (
+            <div key={post._id} className="bg-white rounded-2xl overflow-hidden shadow-md border border-gray-200">
+              {/* Post Header */}
+              <div className="p-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {imagePreview ? (
+                    <img src={imagePreview} alt={form.name} className="w-10 h-10 rounded-full object-cover border-2 border-gray-200" />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center">
+                      <span className="text-white font-semibold text-sm">{form.name?.charAt(0).toUpperCase()}</span>
+                    </div>
+                  )}
+                  <div>
+                    <p className="font-semibold text-black text-base">{form.name}</p>
+                    <p className="text-xs text-gray-500">{new Date(post.createdAt).toLocaleDateString()}</p>
+                  </div>
+                </div>
+
+                {/* Delete button */}
+                <button
+                  onClick={() => handleDeletePost(post._id)}
+                  className="text-red-400 hover:text-red-600 text-sm px-2 py-1 rounded hover:bg-red-50"
+                >
+                  🗑️ Delete
+                </button>
+              </div>
+
+              {/* Post Image */}
+              {post.image && (
+                <img src={post.image} alt={post.caption || "post"} className="w-full h-auto object-cover" />
+              )}
+
+              {/* Caption */}
+              {post.caption && (
+                <div className="p-4">
+                  <p className="text-black">
+                    <span className="font-semibold">{form.name}</span>{" "}{post.caption}
+                  </p>
+                </div>
+              )}
+
+              {/* Likes & Comments */}
+              <div className="px-4 pb-4 flex gap-4 text-sm text-gray-500">
+                <span>❤️ {(post.likes || []).length}</span>
+                <span>💬 {(post.comments || []).length}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
