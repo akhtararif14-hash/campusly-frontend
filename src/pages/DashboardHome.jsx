@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom"; // ✅ NEW
+import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
 
 const DashboardHome = () => {
   const { user } = useAuth();
-  const navigate = useNavigate(); // ✅ NEW
+  const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [newPostImage, setNewPostImage] = useState(null);
@@ -15,7 +15,6 @@ const DashboardHome = () => {
   const [commentText, setCommentText] = useState({});
   const [showComments, setShowComments] = useState({});
 
-  // Fetch all posts
   useEffect(() => {
     const fetchPosts = async () => {
       try {
@@ -31,33 +30,26 @@ const DashboardHome = () => {
     fetchPosts();
   }, []);
 
-  // ✅ Navigate to user profile on avatar/name click
   const handleProfileClick = (post) => {
     const postUserId = post.userId?._id || post.userId;
     if (!postUserId) return;
-
-    // If it's the logged-in user's own post, go to /profile
-    if (user && postUserId === user._id) {
+    if (user && postUserId.toString() === user._id.toString()) {
       navigate("/profile");
     } else {
       navigate(`/user/${postUserId}`);
     }
   };
 
-  // Create new post
   const handleCreatePost = async () => {
     const hasCaption = newPostCaption.trim() !== "";
     const hasImage = !!newPostImage;
-
     if (!hasCaption && !hasImage) {
       alert("Please write something or select a photo");
       return;
     }
-
     const formData = new FormData();
     if (hasImage) formData.append("image", newPostImage);
     if (hasCaption) formData.append("caption", newPostCaption);
-
     try {
       setCreating(true);
       const res = await api.post("/api/feed/post", formData);
@@ -73,7 +65,6 @@ const DashboardHome = () => {
     }
   };
 
-  // Delete post
   const handleDeletePost = async (postId) => {
     if (!window.confirm("Delete this post?")) return;
     try {
@@ -85,7 +76,6 @@ const DashboardHome = () => {
     }
   };
 
-  // Like/Unlike post
   const handleLikePost = async (postId) => {
     if (!user) { alert("Please login to like posts"); return; }
     try {
@@ -107,7 +97,6 @@ const DashboardHome = () => {
     }
   };
 
-  // Add comment
   const handleAddComment = async (postId) => {
     const text = commentText[postId]?.trim();
     if (!text) return;
@@ -128,7 +117,6 @@ const DashboardHome = () => {
     }
   };
 
-  // Format date
   const formatDate = (date) => {
     const now = new Date();
     const postDate = new Date(date);
@@ -143,10 +131,18 @@ const DashboardHome = () => {
     return postDate.toLocaleDateString();
   };
 
-  // Render avatar — now wrapped in a clickable div
+  // ✅ FIXED: properly reads profileImage from populated userId object
   const renderAvatar = (post, sizeClass = "w-10 h-10") => {
-    const profileImage = post.userId?.profileImage || null;
-    const name = post.userName || "?";
+    const profileImage =
+      typeof post.userId === "object"
+        ? post.userId?.profileImage
+        : null;
+
+    const name =
+      typeof post.userId === "object"
+        ? post.userId?.name
+        : post.userName || "?";
+
     if (profileImage) {
       return (
         <img
@@ -156,13 +152,24 @@ const DashboardHome = () => {
         />
       );
     }
+
     return (
-      <div className={`${sizeClass} rounded-full bg-blue-500 flex items-center justify-center border-2 border-gray-200 cursor-pointer hover:opacity-80 transition-opacity`}>
+      <div
+        className={`${sizeClass} rounded-full bg-blue-500 flex items-center justify-center border-2 border-gray-200 cursor-pointer hover:opacity-80 transition-opacity`}
+      >
         <span className="text-white font-semibold text-sm">
-          {name.charAt(0).toUpperCase()}
+          {(name || "?").charAt(0).toUpperCase()}
         </span>
       </div>
     );
+  };
+
+  // ✅ FIXED: properly reads name from populated userId object
+  const getPostName = (post) => {
+    if (typeof post.userId === "object" && post.userId?.name) {
+      return post.userId.name;
+    }
+    return post.userName || "Unknown";
   };
 
   if (loading) {
@@ -175,15 +182,21 @@ const DashboardHome = () => {
 
   return (
     <div className="space-y-6 pb-14">
-      {/* Create Post Section */}
+      {/* Create Post */}
       {user && (
         <div className="bg-gray-100 p-4 rounded-2xl shadow-sm">
           <div className="flex gap-3 items-center">
             {user.profileImage ? (
-              <img src={user.profileImage} alt={user.name} className="w-10 h-10 rounded-full object-cover border-2 border-gray-300 flex-shrink-0" />
+              <img
+                src={user.profileImage}
+                alt={user.name}
+                className="w-10 h-10 rounded-full object-cover border-2 border-gray-300 flex-shrink-0"
+              />
             ) : (
               <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
-                <span className="text-white font-semibold text-sm">{user.name?.charAt(0).toUpperCase() || "?"}</span>
+                <span className="text-white font-semibold text-sm">
+                  {user.name?.charAt(0).toUpperCase() || "?"}
+                </span>
               </div>
             )}
 
@@ -254,19 +267,20 @@ const DashboardHome = () => {
 
               {/* Post Header */}
               <div className="p-4 flex justify-between items-center">
-                {/* ✅ Clickable avatar + name */}
                 <div
                   className="flex items-center gap-3 cursor-pointer"
                   onClick={() => handleProfileClick(post)}
                 >
                   {renderAvatar(post, "w-10 h-10")}
                   <div>
-                    <p className="font-semibold text-black text-base leading-tight hover:underline">{post.userName}</p>
+                    <p className="font-semibold text-black text-base leading-tight hover:underline">
+                      {getPostName(post)}
+                    </p>
                     <p className="text-xs text-gray-500">{formatDate(post.createdAt)}</p>
                   </div>
                 </div>
 
-                {user && (post.userId?._id || post.userId) === user._id && (
+                {user && (post.userId?._id || post.userId)?.toString() === user._id?.toString() && (
                   <button
                     onClick={() => handleDeletePost(post._id)}
                     className="text-red-600 hover:text-red-700 text-sm font-medium px-3 py-1 rounded-lg hover:bg-red-50 transition-colors"
@@ -278,30 +292,29 @@ const DashboardHome = () => {
 
               {/* Post Image */}
               {post.image && (
-                <div className="w-full">
-                  <img
-                    src={post.image}
-                    alt={post.caption || "Post image"}
-                    className="w-full h-auto object-cover"
-                  />
-                </div>
+                <img
+                  src={post.image}
+                  alt={post.caption || "Post image"}
+                  className="w-full h-auto object-cover"
+                />
               )}
 
-              {/* Post Actions */}
+              {/* Caption + Actions */}
               <div className="p-4">
-                
-
                 {post.caption && (
                   <p className="mb-3 text-black">
-                    <span className="font-semibold">{post.userName}</span>{" "}{post.caption}
+                    <span className="font-semibold">{getPostName(post)}</span>{" "}{post.caption}
                   </p>
                 )}
+
                 <div className="flex gap-4 mb-3">
                   <button
                     onClick={() => handleLikePost(post._id)}
                     disabled={!user}
                     className={`flex items-center gap-2 transition-colors ${
-                      user && (post.likes || []).includes(user._id) ? "text-red-500" : "text-gray-700 hover:text-red-500"
+                      user && (post.likes || []).includes(user._id)
+                        ? "text-red-500"
+                        : "text-gray-700 hover:text-red-500"
                     } ${!user ? "opacity-50 cursor-not-allowed" : ""}`}
                   >
                     <span className="text-2xl">
