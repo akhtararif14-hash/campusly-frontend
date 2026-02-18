@@ -92,17 +92,20 @@ export default function Profile() {
   };
 
   const saveProfile = async (e) => {
-    e.preventDefault();
-    try {
-      if (profileImage) await uploadProfileImage();
-      const res = await api.put("/api/user/me", form);
-      updateUser(res.data);
-      showMessage("Profile updated!", "success");
-      setIsEditing(false);
-    } catch (err) {
-      showMessage(err?.response?.data?.message || "Failed to update", "error");
-    }
-  };
+  e.preventDefault();
+  try {
+    if (profileImage) await uploadProfileImage();
+    const res = await api.put("/api/user/me", form);
+    console.log("✅ Save response:", res.data); // ← add this
+    console.log("✅ Branch in response:", res.data.branch); // ← add this
+    updateUser(res.data);
+    showMessage("Profile updated!", "success");
+    setIsEditing(false);
+  } catch (err) {
+    showMessage(err?.response?.data?.message || "Failed to update", "error");
+  }
+};
+
 
   const handleDeletePost = async (postId) => {
     if (!window.confirm("Delete this post?")) return;
