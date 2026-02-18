@@ -23,6 +23,7 @@ import { AuthProvider } from "./context/AuthContext.jsx";
 import ProtectedRoute from "./routes/ProtectedRoute.jsx";
 import Chat from "./pages/Chat.jsx";
 import Messages from "./pages/Messages.jsx";
+import Timetable from "./pages/Timetable";
 
 
 const router = createBrowserRouter([
@@ -30,6 +31,10 @@ const router = createBrowserRouter([
   {
     path: "/login",
     element: <Login />,
+  },
+  {
+    path: "/timetable",
+    element: <Timetable />, 
   },
   {
   path: "/Chat/:userId",

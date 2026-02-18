@@ -5,7 +5,7 @@ import { useAuth } from "../context/AuthContext";
 
 export default function Profile() {
   const { user, updateUser } = useAuth();
-  const [form, setForm] = useState({ name: "", username: "", description: "" });
+  const [form, setForm] = useState({ name: "", username: "", description: "", branch: "", year: "", section: "" });
   const [profileImage, setProfileImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [uploading, setUploading] = useState(false);
@@ -23,12 +23,12 @@ export default function Profile() {
           name: res.data.name || "",
           username: res.data.username || "",
           description: res.data.description || "",
+          branch: res.data.branch || "",
+          year: res.data.year || "",
+          section: res.data.section || "",
         });
-        if (res.data.profileImage) {
-          setImagePreview(res.data.profileImage);
-        }
+        if (res.data.profileImage) setImagePreview(res.data.profileImage);
 
-        // Fetch this user's posts
         if (res.data._id) {
           try {
             const postsRes = await api.get(`/api/feed/user/${res.data._id}/posts`);
@@ -57,21 +57,17 @@ export default function Profile() {
   const handleImageSelect = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"];
     if (!validTypes.includes(file.type)) {
       showMessage("Please upload JPG, PNG, GIF, or WEBP image", "error");
       e.target.value = "";
       return;
     }
-
-    const maxSize = 5 * 1024 * 1024;
-    if (file.size > maxSize) {
+    if (file.size > 5 * 1024 * 1024) {
       showMessage("Image too large. Max 5MB", "error");
       e.target.value = "";
       return;
     }
-
     setProfileImage(file);
     setImagePreview(URL.createObjectURL(file));
   };
@@ -88,7 +84,6 @@ export default function Profile() {
       updateUser(res.data);
       setImagePreview(res.data.profileImage);
       setProfileImage(null);
-      showMessage("Profile picture updated!", "success");
     } catch (err) {
       showMessage(err.response?.data?.message || "Failed to upload", "error");
     } finally {
@@ -137,9 +132,7 @@ export default function Profile() {
       </div>
 
       {message && (
-        <div className={`mb-4 p-3 rounded-lg ${
-          message.type === "success" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-        }`}>
+        <div className={`mb-4 p-3 rounded-lg ${message.type === "success" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
           {message.msg}
         </div>
       )}
@@ -151,16 +144,10 @@ export default function Profile() {
             {/* Avatar */}
             <div className="relative">
               {imagePreview ? (
-                <img
-                  src={imagePreview}
-                  alt="Profile"
-                  className="w-24 h-24 rounded-full object-cover border-4 border-blue-200"
-                />
+                <img src={imagePreview} alt="Profile" className="w-24 h-24 rounded-full object-cover border-4 border-blue-200" />
               ) : (
                 <div className="w-24 h-24 rounded-full bg-blue-500 flex items-center justify-center border-4 border-blue-200">
-                  <span className="text-white text-3xl font-bold">
-                    {form.name?.charAt(0).toUpperCase() || "?"}
-                  </span>
+                  <span className="text-white text-3xl font-bold">{form.name?.charAt(0).toUpperCase() || "?"}</span>
                 </div>
               )}
               {isEditing && (
@@ -171,12 +158,16 @@ export default function Profile() {
               )}
             </div>
 
-            {/* Name & username */}
+            {/* Name & Info */}
             <div>
               <h2 className="text-xl font-bold text-black">{form.name || "Your Name"}</h2>
               {form.username && <p className="text-gray-500 text-sm">@{form.username}</p>}
-              {form.description && !isEditing && (
-                <p className="text-gray-600 text-sm mt-1">{form.description}</p>
+              {form.description && !isEditing && <p className="text-gray-600 text-sm mt-1">{form.description}</p>}
+              {/* Show branch/year/section when not editing */}
+              {!isEditing && form.branch && (
+                <p className="text-blue-500 text-xs mt-1">
+                  {form.branch} • Year {form.year} • Section {form.section}
+                </p>
               )}
               <p className="text-gray-400 text-xs mt-1">{posts.length} posts</p>
             </div>
@@ -198,6 +189,7 @@ export default function Profile() {
             {profileImage && (
               <p className="text-xs text-blue-600">✅ New photo selected — will upload on save</p>
             )}
+
             <div>
               <label className="block text-sm font-medium mb-1">Full Name</label>
               <input
@@ -207,6 +199,7 @@ export default function Profile() {
                 className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-400"
               />
             </div>
+
             <div>
               <label className="block text-sm font-medium mb-1">Username</label>
               <input
@@ -216,6 +209,7 @@ export default function Profile() {
                 className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-400"
               />
             </div>
+
             <div>
               <label className="block text-sm font-medium mb-1">Bio</label>
               <textarea
@@ -226,6 +220,56 @@ export default function Profile() {
                 className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-400"
               />
             </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Branch</label>
+              <select
+                name="branch"
+                value={form.branch}
+                onChange={handleChange}
+                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-400"
+              >
+                <option value="">Select Branch</option>
+                <option value="CSE">Computer Science (CSE)</option>
+                <option value="ECE">Electronics (ECE)</option>
+                <option value="ME">Mechanical (ME)</option>
+                <option value="CE">Civil (CE)</option>
+                <option value="EE">Electrical (EE)</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Year</label>
+              <select
+                name="year"
+                value={form.year}
+                onChange={handleChange}
+                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-400"
+              >
+                <option value="">Select Year</option>
+                <option value="1">1st Year</option>
+                <option value="2">2nd Year</option>
+                <option value="3">3rd Year</option>
+                <option value="4">4th Year</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Section</label>
+              <select
+                name="section"
+                value={form.section}
+                onChange={handleChange}
+                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-400"
+              >
+                <option value="">Select Section</option>
+                <option value="A">Section A</option>
+                <option value="B">Section B</option>
+                <option value="C">Section C</option>
+                <option value="D">Section D</option>
+              </select>
+            </div>
+
             <div className="flex gap-3">
               <button
                 type="submit"
@@ -259,7 +303,6 @@ export default function Profile() {
         <div className="space-y-6">
           {posts.map((post) => (
             <div key={post._id} className="bg-white rounded-2xl overflow-hidden shadow-md border border-gray-200">
-              {/* Post Header */}
               <div className="p-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   {imagePreview ? (
@@ -274,8 +317,6 @@ export default function Profile() {
                     <p className="text-xs text-gray-500">{new Date(post.createdAt).toLocaleDateString()}</p>
                   </div>
                 </div>
-
-                {/* Delete button */}
                 <button
                   onClick={() => handleDeletePost(post._id)}
                   className="text-red-400 hover:text-red-600 text-sm px-2 py-1 rounded hover:bg-red-50"
@@ -284,21 +325,18 @@ export default function Profile() {
                 </button>
               </div>
 
-              {/* Post Image */}
               {post.image && (
                 <img src={post.image} alt={post.caption || "post"} className="w-full h-auto object-cover" />
               )}
 
-              {/* Caption */}
               {post.caption && (
                 <div className="p-4">
-                  <p className="text-black">
+                  <p className="text-black whitespace-pre-wrap">
                     <span className="font-semibold">{form.name}</span>{" "}{post.caption}
                   </p>
                 </div>
               )}
 
-              {/* Likes & Comments */}
               <div className="px-4 pb-4 flex gap-4 text-sm text-gray-500">
                 <span>❤️ {(post.likes || []).length}</span>
                 <span>💬 {(post.comments || []).length}</span>
