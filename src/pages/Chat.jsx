@@ -58,6 +58,12 @@ export default function Chat() {
     };
   }, [user, receiverId]);
 
+  useEffect(() => {
+  if (user && receiverId === user._id) {
+    navigate("/messages", { replace: true });
+  }
+}, [user, receiverId, navigate]);
+
   // Load messages and receiver info
   useEffect(() => {
     if (!receiverId) return;

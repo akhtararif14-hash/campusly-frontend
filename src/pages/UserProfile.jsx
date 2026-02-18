@@ -82,16 +82,25 @@ export default function UserProfile() {
           )}
 
           {/* Info */}
-          <div>
-            <h1 className="text-2xl font-bold text-black">{profile.name}</h1>
-            {profile.username && (
-              <p className="text-gray-500 text-sm">@{profile.username}</p>
-            )}
-            {profile.description && (
-              <p className="text-gray-700 mt-2 text-sm">{profile.description}</p>
-            )}
-            <p className="text-gray-400 text-xs mt-2">{posts.length} posts</p>
-          </div>
+         {/* Info */}
+<div className="flex-1">
+  <h1 className="text-2xl font-bold text-black">{profile.name}</h1>
+  {profile.username && (
+    <p className="text-gray-500 text-sm">@{profile.username}</p>
+  )}
+  {profile.description && (
+    <p className="text-gray-700 mt-2 text-sm">{profile.description}</p>
+  )}
+  <p className="text-gray-400 text-xs mt-2">{posts.length} posts</p>
+
+  {/* Message Button */}
+  <button
+    onClick={() => navigate(`/chat/${userId}`)}
+    className="mt-3 flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-full transition"
+  >
+    💬 Message
+  </button>
+</div>
         </div>
       </div>
 
