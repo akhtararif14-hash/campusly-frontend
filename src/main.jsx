@@ -24,6 +24,7 @@ import Chat from "./pages/Chat.jsx";
 import Messages from "./pages/Messages.jsx";
 import Timetable from "./pages/Timetable";
 import RoomFinder from "./pages/RoomFinder";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 const router = createBrowserRouter([
   // ✅ AUTH ROUTES (PUBLIC)
@@ -127,6 +128,7 @@ const router = createBrowserRouter([
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <AuthProvider>
+       <SpeedInsights />
       <RouterProvider router={router} />
     </AuthProvider>
   </React.StrictMode>
