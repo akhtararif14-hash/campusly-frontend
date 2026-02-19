@@ -235,10 +235,14 @@ export default function Profile() {
               >
                 <option value="">Select Branch</option>
                 <option value="CSE">Computer Science (CSE)</option>
+                <option value="EE">Computer Science & Engineering (Data Sciences) (EE)</option>
+                <option value="ME">Electronics & Communication Engineering (ECE)</option>
+                <option value="CE">VLSI Design & Technology (VLSI)</option>
+                <option value="EE">Electrical(EE)</option>
                 <option value="ECE">Electronics (ECE)</option>
                 <option value="ME">Mechanical (ME)</option>
                 <option value="CE">Civil (CE)</option>
-                <option value="EE">Electrical (EE)</option>
+                <option value="EE">Electrical & Computer Engineering (SFS)</option>
               </select>
             </div>
 
@@ -271,6 +275,10 @@ export default function Profile() {
                 <option value="B">Section B</option>
                 <option value="C">Section C</option>
                 <option value="D">Section D</option>
+                <option value="E">Section E</option>
+                <option value="F">Section F</option>
+                <option value="G">Section G</option>
+                <option value="H">Section H</option>
               </select>
             </div>
 
