@@ -147,7 +147,7 @@ export default function Timetable() {
   );
 
   return (
-    <div className="min-h-screen bg-zinc-950">
+    <div className="min-h-screen">
       <div className="max-w-2xl mx-auto px-4 py-6 pb-24">
 
         {/* ── Top Bar ── */}
