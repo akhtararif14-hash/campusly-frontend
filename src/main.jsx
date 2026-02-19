@@ -16,6 +16,7 @@ import Checkout from "./pages/Checkout.jsx";
 import OrderSuccess from "./pages/OrderSuccess.jsx";
 import Login from "./pages/Login.jsx";
 import Signup from "./pages/Signup.jsx";
+import Setting from "./pages/Setting.jsx";
 
 import { AuthProvider } from "./context/AuthContext.jsx";
 import ProtectedRoute from "./routes/ProtectedRoute.jsx";
