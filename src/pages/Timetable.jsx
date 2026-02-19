@@ -6,12 +6,10 @@ import api from "../api/axios";
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 function parseTime(timeStr) {
-  // Handles "09:00-09:50" or "09:00 AM" formats
   const str = timeStr.split("-")[0].trim();
   const [h, m] = str.split(":").map(Number);
   return h * 60 + (m || 0);
 }
-
 function parseEndTime(timeStr) {
   const parts = timeStr.split("-");
   if (parts.length < 2) return null;
@@ -19,12 +17,10 @@ function parseEndTime(timeStr) {
   const [h, m] = str.split(":").map(Number);
   return h * 60 + (m || 0);
 }
-
 function getNowMinutes() {
   const now = new Date();
   return now.getHours() * 60 + now.getMinutes();
 }
-
 function getProgress(slot) {
   const start = parseTime(slot.time);
   const end = parseEndTime(slot.time);
@@ -34,7 +30,6 @@ function getProgress(slot) {
   if (now > end) return 100;
   return Math.round(((now - start) / (end - start)) * 100);
 }
-
 function isCurrentSlot(slot) {
   const start = parseTime(slot.time);
   const end = parseEndTime(slot.time);
@@ -42,19 +37,16 @@ function isCurrentSlot(slot) {
   const now = getNowMinutes();
   return now >= start && now <= end;
 }
-
 function isUpcoming(slot) {
   const start = parseTime(slot.time);
   const now = getNowMinutes();
   return start > now && start - now <= 30;
 }
-
 function isPast(slot) {
   const end = parseEndTime(slot.time);
   if (!end) return false;
   return getNowMinutes() > end;
 }
-
 function getTimeLeft(slot) {
   const end = parseEndTime(slot.time);
   if (!end) return "";
@@ -63,7 +55,6 @@ function getTimeLeft(slot) {
   if (diff < 60) return `${diff}m left`;
   return `${Math.floor(diff / 60)}h ${diff % 60}m left`;
 }
-
 function getNextClass(slots) {
   const now = getNowMinutes();
   return slots?.find((s) => parseTime(s.time) > now) || null;
@@ -84,7 +75,6 @@ export default function Timetable() {
     setActiveDay(DAYS.includes(today) ? today : "Monday");
   }, []);
 
-  // Live clock — update every 30 seconds
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 30000);
     return () => clearInterval(timer);
@@ -93,14 +83,12 @@ export default function Timetable() {
   useEffect(() => {
     if (!user) { setLoading(false); return; }
     if (!user.branch || !user.year || !user.section) { setLoading(false); return; }
-
     api.get("/api/timetable/my")
       .then((res) => setTimetable(res.data))
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [user]);
 
-  // Scroll to current period
   useEffect(() => {
     if (currentRef.current && activeDay === today) {
       currentRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -111,26 +99,33 @@ export default function Timetable() {
   const slots = todaySchedule?.slots || [];
   const nextClass = activeDay === today ? getNextClass(slots) : null;
 
-  const formatClock = (d) =>
-    d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+  // Modern time formatting
+  let hours = now.getHours();
+  const minutes = now.getMinutes().toString().padStart(2, "0");
+  const ampm = hours >= 12 ? "PM" : "AM";
+  hours = (hours % 12 || 12).toString();
+
+  const dateStr = now.toLocaleDateString("en-US", {
+    weekday: "long", month: "short", day: "numeric"
+  });
 
   if (loading) return (
-    <div className="flex items-center justify-center min-h-[60vh]">
+    <div className="flex items-center justify-center min-h-screen bg-zinc-950">
       <div className="text-center">
-        <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-        <p className="text-gray-500 text-sm">Loading timetable...</p>
+        <div className="w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+        <p className="text-zinc-500 text-sm">Loading timetable...</p>
       </div>
     </div>
   );
 
   if (!user) return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-indigo-950 flex items-center justify-center p-6">
-      <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-10 text-center max-w-sm w-full">
+    <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-6">
+      <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-10 text-center max-w-sm w-full">
         <div className="text-6xl mb-5">🔒</div>
         <h2 className="text-2xl font-bold text-white mb-2">Login Required</h2>
-        <p className="text-white/60 mb-8 text-sm">Please login to view your timetable</p>
+        <p className="text-zinc-500 mb-8 text-sm">Please login to view your timetable</p>
         <button onClick={() => navigate("/login")}
-          className="w-full bg-indigo-500 hover:bg-indigo-600 text-white py-3 rounded-2xl font-semibold transition-all active:scale-95">
+          className="w-full bg-amber-500 hover:bg-amber-600 text-white py-3 rounded-2xl font-semibold transition-all">
           Login →
         </button>
       </div>
@@ -138,13 +133,13 @@ export default function Timetable() {
   );
 
   if (!user?.branch || !user?.year || !user?.section) return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-indigo-950 flex items-center justify-center p-6">
-      <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-10 text-center max-w-sm w-full">
+    <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-6">
+      <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-10 text-center max-w-sm w-full">
         <div className="text-6xl mb-5">📚</div>
         <h2 className="text-2xl font-bold text-white mb-2">Setup Profile First</h2>
-        <p className="text-white/60 mb-8 text-sm">Add your Branch, Year and Section in your profile</p>
+        <p className="text-zinc-500 mb-8 text-sm">Add your Branch, Year and Section in profile</p>
         <button onClick={() => navigate("/profile")}
-          className="w-full bg-indigo-500 hover:bg-indigo-600 text-white py-3 rounded-2xl font-semibold transition-all active:scale-95">
+          className="w-full bg-amber-500 hover:bg-amber-600 text-white py-3 rounded-2xl font-semibold transition-all">
           Go to Profile →
         </button>
       </div>
@@ -152,57 +147,90 @@ export default function Timetable() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900">
+    <div className="min-h-screen bg-zinc-950">
       <div className="max-w-2xl mx-auto px-4 py-6 pb-24">
 
-        {/* ── Header ── */}
-        <div className="flex items-start justify-between mb-6">
+        {/* ── Top Bar ── */}
+        <div className="flex items-center gap-3 mb-6">
+          <button onClick={() => navigate("/")}
+            className="w-10 h-10 bg-zinc-800 hover:bg-amber-500 text-white rounded-xl flex items-center justify-center transition-all active:scale-95 flex-shrink-0 font-bold text-lg">
+            ‹
+          </button>
           <div>
-            <h1 className="text-3xl font-black text-white tracking-tight">Timetable</h1>
-            <p className="text-indigo-300 text-sm mt-1">
-              {user.branch} • Year {user.year} • Sec {user.section}
-            </p>
-          </div>
-          <div className="text-right">
-            <p className="text-white font-bold text-xl tabular-nums">{formatClock(now)}</p>
-            <p className="text-indigo-300 text-xs">{today}</p>
+            <h1 className="text-xl font-black text-white leading-none tracking-tight">Timetable</h1>
+            <p className="text-zinc-500 text-xs mt-0.5">{user.branch} • Year {user.year} • Sec {user.section}</p>
           </div>
         </div>
 
-        {/* ── Next Class Banner (today only) ── */}
+        {/* ── Modern Clock Card ── */}
+        <div className="rounded-3xl p-6 mb-5 relative overflow-hidden"
+          style={{ background: "linear-gradient(135deg, #1c1917 0%, #292524 50%, #1c1917 100%)", border: "1px solid #3f3f46" }}>
+
+          {/* Decorative glow */}
+          <div className="absolute top-0 right-0 w-40 h-40 rounded-full opacity-20"
+            style={{ background: "radial-gradient(circle, #f59e0b, transparent)", transform: "translate(30%, -30%)" }} />
+          <div className="absolute bottom-0 left-0 w-32 h-32 rounded-full opacity-10"
+            style={{ background: "radial-gradient(circle, #ef4444, transparent)", transform: "translate(-30%, 30%)" }} />
+
+          <div className="relative flex items-end justify-between">
+            {/* Big time */}
+            <div>
+              <div className="flex items-start gap-1">
+                <span className="text-7xl font-black text-white tabular-nums leading-none" style={{ letterSpacing: "-4px" }}>
+                  {hours}:{minutes}
+                </span>
+                <div className="flex flex-col justify-start mt-2 ml-1">
+                  <span className="text-lg font-bold text-amber-400">{ampm}</span>
+                </div>
+              </div>
+              <p className="text-zinc-400 text-sm mt-2">{dateStr}</p>
+            </div>
+
+            {/* Chips */}
+            <div className="flex flex-col gap-1.5 items-end">
+              <span className="bg-amber-500/20 text-amber-400 text-xs px-3 py-1 rounded-full font-bold border border-amber-500/30">
+                {user.branch}
+              </span>
+              <span className="bg-zinc-700/50 text-zinc-300 text-xs px-3 py-1 rounded-full font-medium">
+                Yr {user.year} • Sec {user.section}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Next Class Banner ── */}
         {activeDay === today && nextClass && (
-          <div className="bg-gradient-to-r from-indigo-600 to-violet-600 rounded-2xl p-4 mb-5 flex items-center gap-4 shadow-lg shadow-indigo-900/50">
-            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
-              <span className="text-xl">⏰</span>
-            </div>
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 mb-5 flex items-center gap-4">
+            <div className="w-10 h-10 bg-amber-500/10 rounded-xl flex items-center justify-center flex-shrink-0 text-xl">⏰</div>
             <div className="flex-1 min-w-0">
-              <p className="text-white/70 text-xs font-medium uppercase tracking-wider">Next Class</p>
-              <p className="text-white font-bold truncate">{nextClass.subject}</p>
-              <p className="text-white/60 text-xs">{nextClass.time} • {nextClass.room}</p>
+              <p className="text-zinc-600 text-xs font-medium uppercase tracking-wider">Up Next</p>
+              <p className="text-white font-bold truncate text-sm">{nextClass.subject}</p>
+              <p className="text-zinc-600 text-xs">{nextClass.time} • {nextClass.room}</p>
             </div>
-            <div className="bg-white/20 px-3 py-1.5 rounded-xl">
-              <p className="text-white text-xs font-bold">
-                {Math.max(0, parseTime(nextClass.time) - getNowMinutes())}m
+            <div className="bg-amber-500/10 border border-amber-500/20 px-3 py-2 rounded-xl text-center">
+              <p className="text-amber-400 text-lg font-black leading-none">
+                {Math.max(0, parseTime(nextClass.time) - getNowMinutes())}
               </p>
+              <p className="text-amber-600 text-xs">min</p>
             </div>
           </div>
         )}
 
         {/* ── Day Tabs ── */}
-        <div className="flex gap-2 overflow-x-auto pb-2 mb-5 scrollbar-hide">
+        <div className="flex gap-2 overflow-x-auto pb-2 mb-5" style={{ scrollbarWidth: "none" }}>
           {DAYS.map((day) => {
             const isActive = activeDay === day;
             const isToday = day === today;
             return (
               <button key={day} onClick={() => setActiveDay(day)}
-                className={`flex-shrink-0 relative px-4 py-2.5 rounded-2xl text-sm font-bold transition-all duration-200 ${
+                className={`flex-shrink-0 relative px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 ${
                   isActive
-                    ? "bg-indigo-500 text-white shadow-lg shadow-indigo-500/40 scale-105"
-                    : "bg-white/10 text-white/60 hover:bg-white/20 hover:text-white"
+                    ? "bg-amber-500 text-white shadow-lg"
+                    : "bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-600"
                 }`}>
-                {day.slice(0, 3)}
+                {day.slice(0, 3).toUpperCase()}
                 {isToday && !isActive && (
-                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-green-400 rounded-full border-2 border-slate-900" />
+                  <span className="absolute -top-1 -right-1 w-2 h-2 bg-amber-400 rounded-full border border-zinc-950" />
                 )}
               </button>
             );
@@ -213,123 +241,113 @@ export default function Timetable() {
         {slots.length === 0 ? (
           <div className="text-center py-20">
             <div className="text-6xl mb-4">🎉</div>
-            <p className="text-white font-bold text-xl">No Classes!</p>
-            <p className="text-white/40 text-sm mt-1">Enjoy your free day on {activeDay}</p>
+            <p className="text-white font-bold text-xl">Free Day!</p>
+            <p className="text-zinc-500 text-sm mt-1">No classes on {activeDay}</p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-2">
             {slots.map((slot, i) => {
               const isCurrent = activeDay === today && isCurrentSlot(slot);
               const upcoming = activeDay === today && isUpcoming(slot);
               const past = activeDay === today && isPast(slot);
               const progress = isCurrent ? getProgress(slot) : 0;
               const timeLeft = isCurrent ? getTimeLeft(slot) : "";
-              const isLab = slot.subject?.toLowerCase().includes("lab") ||
-                            slot.time?.includes("04") ||
-                            (parseEndTime(slot.time) - parseTime(slot.time)) >= 90;
+              const duration = parseEndTime(slot.time) - parseTime(slot.time);
+              const isLab = slot.subject?.toLowerCase().includes("lab") || duration >= 90;
 
               return (
                 <div key={i}
                   ref={isCurrent ? currentRef : null}
-                  className={`relative rounded-2xl overflow-hidden transition-all duration-500 ${
-                    isCurrent
-                      ? "ring-2 ring-green-400 ring-offset-2 ring-offset-slate-900 shadow-xl shadow-green-500/20 scale-[1.02]"
-                      : upcoming
-                      ? "ring-1 ring-yellow-400/50"
-                      : past
-                      ? "opacity-50"
-                      : ""
-                  }`}
-                >
-                  {/* Card background */}
-                  <div className={`absolute inset-0 ${
-                    isCurrent
-                      ? "bg-gradient-to-r from-green-900/80 to-emerald-900/60"
+                  className={`relative rounded-2xl overflow-hidden transition-all duration-300 ${past ? "opacity-35" : ""}`}
+                  style={{
+                    background: isCurrent
+                      ? "linear-gradient(135deg, #1c1400 0%, #292000 100%)"
                       : isLab
-                      ? "bg-gradient-to-r from-purple-900/80 to-violet-900/60"
-                      : "bg-white/8"
-                  } backdrop-blur-sm`} />
+                      ? "linear-gradient(135deg, #130b1f 0%, #1a0f2e 100%)"
+                      : "#18181b",
+                    border: isCurrent
+                      ? "1px solid rgba(245,158,11,0.5)"
+                      : upcoming
+                      ? "1px solid rgba(234,179,8,0.3)"
+                      : "1px solid #27272a",
+                    boxShadow: isCurrent ? "0 0 20px rgba(245,158,11,0.08)" : "none"
+                  }}>
 
-                  {/* Progress bar for current period */}
+                  {/* Left accent */}
+                  <div className={`absolute left-0 top-3 bottom-3 w-0.5 rounded-full ${
+                    isCurrent ? "bg-amber-500"
+                    : isLab ? "bg-violet-500"
+                    : upcoming ? "bg-yellow-500"
+                    : past ? "bg-zinc-700"
+                    : "bg-zinc-700"
+                  }`} />
+
+                  {/* Progress bar */}
                   {isCurrent && (
-                    <div className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-green-400 to-emerald-400 transition-all duration-1000"
-                      style={{ width: `${progress}%` }} />
+                    <div className="absolute bottom-0 left-0 h-0.5 transition-all duration-1000"
+                      style={{
+                        width: `${progress}%`,
+                        background: "linear-gradient(90deg, #f59e0b, #ef4444)"
+                      }} />
                   )}
 
-                  <div className="relative p-4 flex items-center gap-4">
-                    {/* Period number */}
-                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 font-black text-sm ${
-                      isCurrent ? "bg-green-400 text-green-900"
-                      : isLab ? "bg-purple-500/40 text-purple-300"
-                      : "bg-white/10 text-white/50"
+                  <div className="pl-4 pr-4 py-3.5 flex items-center gap-3">
+                    {/* Period badge */}
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-black ${
+                      isCurrent ? "bg-amber-500 text-white"
+                      : isLab ? "bg-violet-500/20 text-violet-400"
+                      : "bg-zinc-800 text-zinc-500"
                     }`}>
                       {isCurrent ? "▶" : `P${i + 1}`}
                     </div>
 
                     {/* Time */}
-                    <div className={`flex-shrink-0 text-center min-w-[72px] ${
-                      isCurrent ? "text-green-300" : "text-indigo-300"
-                    }`}>
-                      <p className="font-bold text-xs tabular-nums">
+                    <div className="flex-shrink-0 min-w-[64px]">
+                      <p className={`font-bold text-sm tabular-nums ${isCurrent ? "text-amber-400" : "text-zinc-400"}`}>
                         {slot.time?.split("-")[0]}
                       </p>
                       {slot.time?.includes("-") && (
-                        <p className="text-xs opacity-60 tabular-nums">
-                          {slot.time?.split("-")[1]}
-                        </p>
+                        <p className="text-zinc-600 text-xs tabular-nums">{slot.time?.split("-")[1]}</p>
                       )}
                     </div>
 
-                    {/* Subject info */}
+                    {/* Info */}
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <p className={`font-bold truncate ${
-                          isCurrent ? "text-white" : past ? "text-white/40" : "text-white/90"
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <p className={`font-bold text-sm truncate ${
+                          isCurrent ? "text-white" : past ? "text-zinc-600" : "text-zinc-100"
                         }`}>
                           {slot.subject}
                         </p>
-                        {isLab && (
-                          <span className="bg-purple-500/30 text-purple-300 text-xs px-2 py-0.5 rounded-full font-medium flex-shrink-0">
-                            LAB
-                          </span>
-                        )}
                         {isCurrent && (
-                          <span className="bg-green-400/20 text-green-300 text-xs px-2 py-0.5 rounded-full font-bold flex-shrink-0 animate-pulse">
+                          <span className="bg-amber-500/20 text-amber-400 text-xs px-1.5 py-0.5 rounded-md font-bold animate-pulse flex-shrink-0">
                             LIVE
                           </span>
                         )}
-                        {upcoming && (
-                          <span className="bg-yellow-400/20 text-yellow-300 text-xs px-2 py-0.5 rounded-full font-medium flex-shrink-0">
+                        {isLab && (
+                          <span className="bg-violet-500/20 text-violet-400 text-xs px-1.5 py-0.5 rounded-md font-medium flex-shrink-0">
+                            LAB
+                          </span>
+                        )}
+                        {upcoming && !isCurrent && (
+                          <span className="bg-yellow-500/20 text-yellow-400 text-xs px-1.5 py-0.5 rounded-md font-medium flex-shrink-0">
                             SOON
                           </span>
                         )}
                       </div>
-
-                      <div className="flex gap-3 mt-1 flex-wrap">
-                        {slot.teacher && (
-                          <span className={`text-xs ${isCurrent ? "text-green-300/70" : "text-white/40"}`}>
-                            👤 {slot.teacher}
-                          </span>
-                        )}
-                        {slot.room && (
-                          <span className={`text-xs ${isCurrent ? "text-green-300/70" : "text-white/40"}`}>
-                            📍 {slot.room}
-                          </span>
-                        )}
+                      <div className="flex gap-3 mt-0.5">
+                        {slot.teacher && <span className="text-xs text-zinc-600 truncate">👤 {slot.teacher}</span>}
+                        {slot.room && <span className="text-xs text-zinc-600 flex-shrink-0">📍 {slot.room}</span>}
                       </div>
                     </div>
 
-                    {/* Time left / progress */}
-                    <div className="flex-shrink-0 text-right">
-                      {isCurrent ? (
-                        <div>
-                          <p className="text-green-400 text-xs font-bold">{timeLeft}</p>
-                          <p className="text-green-400/60 text-xs">{progress}%</p>
-                        </div>
-                      ) : past && activeDay === today ? (
-                        <p className="text-white/20 text-xs">Done</p>
-                      ) : null}
-                    </div>
+                    {/* Time left */}
+                    {isCurrent && (
+                      <div className="flex-shrink-0 text-right">
+                        <p className="text-amber-400 text-xs font-bold">{timeLeft}</p>
+                        <p className="text-zinc-600 text-xs">{progress}%</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               );
@@ -337,36 +355,26 @@ export default function Timetable() {
           </div>
         )}
 
-        {/* ── Today summary ── */}
+        {/* ── Summary ── */}
         {activeDay === today && slots.length > 0 && (
-          <div className="mt-6 bg-white/5 rounded-2xl p-4 border border-white/10">
-            <p className="text-white/40 text-xs uppercase tracking-wider mb-3">Today's Summary</p>
-            <div className="flex gap-4">
-              <div className="text-center">
-                <p className="text-white font-bold text-lg">{slots.length}</p>
-                <p className="text-white/40 text-xs">Total</p>
-              </div>
-              <div className="text-center">
-                <p className="text-green-400 font-bold text-lg">
-                  {slots.filter(s => isPast(s)).length}
-                </p>
-                <p className="text-white/40 text-xs">Done</p>
-              </div>
-              <div className="text-center">
-                <p className="text-yellow-400 font-bold text-lg">
-                  {slots.filter(s => !isPast(s) && !isCurrentSlot(s)).length}
-                </p>
-                <p className="text-white/40 text-xs">Left</p>
-              </div>
-              <div className="text-center">
-                <p className="text-purple-400 font-bold text-lg">
-                  {slots.filter(s => s.subject?.toLowerCase().includes("lab")).length}
-                </p>
-                <p className="text-white/40 text-xs">Labs</p>
-              </div>
+          <div className="mt-5 bg-zinc-900 border border-zinc-800 rounded-2xl p-4">
+            <p className="text-zinc-600 text-xs uppercase tracking-widest mb-3 font-bold">Today</p>
+            <div className="grid grid-cols-4 gap-2">
+              {[
+                { label: "Total", value: slots.length, color: "text-white" },
+                { label: "Done", value: slots.filter(s => isPast(s)).length, color: "text-emerald-400" },
+                { label: "Left", value: slots.filter(s => !isPast(s) && !isCurrentSlot(s)).length, color: "text-amber-400" },
+                { label: "Labs", value: slots.filter(s => s.subject?.toLowerCase().includes("lab") || (parseEndTime(s.time) - parseTime(s.time)) >= 90).length, color: "text-violet-400" },
+              ].map(({ label, value, color }) => (
+                <div key={label} className="bg-zinc-800 rounded-xl p-3 text-center">
+                  <p className={`text-xl font-black ${color}`}>{value}</p>
+                  <p className="text-zinc-600 text-xs mt-0.5">{label}</p>
+                </div>
+              ))}
             </div>
           </div>
         )}
+
       </div>
     </div>
   );
