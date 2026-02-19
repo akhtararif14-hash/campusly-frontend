@@ -23,13 +23,17 @@ import ProtectedRoute from "./routes/ProtectedRoute.jsx";
 import Chat from "./pages/Chat.jsx";
 import Messages from "./pages/Messages.jsx";
 import Timetable from "./pages/Timetable";
-
+import RoomFinder from "./pages/RoomFinder";
 
 const router = createBrowserRouter([
   // ✅ AUTH ROUTES (PUBLIC)
   {
     path: "/login",
     element: <Login />,
+  },
+  {
+    path: "/rooms",
+    element: <RoomFinder />,
   },
   {
     path: "/resources",
