@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import api from "../api/axios";
 
-const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
 function parseTime(timeStr) {
   const str = timeStr.split("-")[0].trim();
@@ -153,7 +153,7 @@ export default function Timetable() {
         {/* ── Top Bar ── */}
         <div className="flex items-center gap-3 mb-6">
           <button onClick={() => navigate("/")}
-            className="w-10 h-10 bg-zinc-800 hover:bg-amber-500 text-white rounded-xl flex items-center justify-center transition-all active:scale-95 flex-shrink-0 font-bold text-lg">
+            className="w-10 h-10 bg-red hover:bg-amber-500 text-white rounded-xl flex items-center justify-center transition-all active:scale-95 flex-shrink-0 font-bold text-lg">
             ‹
           </button>
           <div>
