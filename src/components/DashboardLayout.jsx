@@ -108,6 +108,7 @@ export default function DashboardLayout() {
     { name: "Home", path: "/", imgsrc: "/images/home.svg" },
     { name: "Campus Shop", path: "/buy-sell", imgsrc: "/images/cart.svg" },
     { name: "Timetable", path: "/timetable", imgsrc: "/images/timetable.svg" },
+    { name: "PYQS & Notes", path: "/resources", imgsrc: "/images/book.svg" },
 
     ...(user && (user.role === "seller" || user.role === "admin")
       ? [{ name: "Seller Dashboard", path: "/seller", imgsrc: "/images/shoppingcart.png" }]

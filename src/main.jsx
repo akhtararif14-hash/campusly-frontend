@@ -2,14 +2,12 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
 import "./App.css";
-
+import Resources from "./pages/Resources";
 import DashboardLayout from "./components/DashboardLayout.jsx";
 import DashboardHome from "./pages/DashboardHome.jsx";
 import BuySell from "./pages/BuySell.jsx";
 import Profile from "./pages/Profile.jsx";
 import UserProfile from "./pages/UserProfile.jsx"; // ✅ ADD THIS LINE
-import Setting from "./pages/Setting.jsx";
-import Navbar from "./pages/Navbar.jsx";
 import Cart from "./pages/Cart.jsx";
 import SellerDashboard from "./pages/seller/SellerDashboard.jsx";
 import AdminDashboard from "./pages/admin/AdminDashboard.jsx";
@@ -31,6 +29,10 @@ const router = createBrowserRouter([
   {
     path: "/login",
     element: <Login />,
+  },
+  {
+    path: "/resources",
+    element: <Resources />,
   },
   {
     path: "/timetable",
