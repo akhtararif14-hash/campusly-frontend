@@ -7,7 +7,7 @@ const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
 // ✅ SET THIS TO TEST — e.g. "09:30" to simulate 9:30 AM
 // Set to null for real time
-const DEBUG_TIME = "12:30"; // ← change this to test, set to null for real time
+const DEBUG_TIME = null;
 
 function getNowMinutes() {
   if (DEBUG_TIME) {
@@ -86,7 +86,7 @@ export default function Timetable() {
   });
   const currentRef = useRef(null);
 
-  const today = DEBUG_TIME ? "Monday" : new Date().toLocaleDateString("en-US", { weekday: "long" });
+  const today = new Date().toLocaleDateString("en-US", { weekday: "long" });
 
   // ✅ When debugging, treat whichever day is active as "today"
   // so LIVE / PAST / SOON badges all work correctly
