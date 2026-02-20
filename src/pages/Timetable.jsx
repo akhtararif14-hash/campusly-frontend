@@ -7,7 +7,7 @@ const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
 // ✅ SET THIS TO TEST — e.g. "09:30" to simulate 9:30 AM
 // Set to null for real time
-const DEBUG_TIME = "09:30"; // ← change this to test, set to null for real time
+const DEBUG_TIME = "10:30"; // ← change this to test, set to null for real time
 
 function getNowMinutes() {
   if (DEBUG_TIME) {
