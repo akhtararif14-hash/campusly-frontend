@@ -26,12 +26,18 @@ import Timetable from "./pages/Timetable";
 import RoomFinder from "./pages/RoomFinder";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import Attendance from "./pages/Attendance";
+import Assignments from "./pages/Assignments";
+
 
 const router = createBrowserRouter([
   // ✅ AUTH ROUTES (PUBLIC)
   {
     path: "/login",
     element: <Login />,
+  },
+  {
+    path: "/assignments",
+    element: <Assignments />,
   },
   {
     path: "/attendance", 

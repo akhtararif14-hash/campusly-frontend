@@ -23,8 +23,6 @@ export const AuthProvider = ({ children }) => {
         headers: { Authorization: `Bearer ${token}` },
       })
      .then((res) => {
-  console.log("🔄 Restored user on refresh:", res.data);
-  console.log("🔄 Branch on refresh:", res.data.branch);
   setUser(res.data);
   localStorage.setItem("user", JSON.stringify(res.data));
 })
