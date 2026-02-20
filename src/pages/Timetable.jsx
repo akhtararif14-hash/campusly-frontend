@@ -86,7 +86,7 @@ export default function Timetable() {
   });
   const currentRef = useRef(null);
 
-  const today = new Date().toLocaleDateString("en-US", { weekday: "long" });
+  const today = DEBUG_TIME ? "Monday" : new Date().toLocaleDateString("en-US", { weekday: "long" });
 
   // ✅ When debugging, treat whichever day is active as "today"
   // so LIVE / PAST / SOON badges all work correctly
