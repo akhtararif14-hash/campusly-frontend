@@ -88,6 +88,10 @@ export default function Timetable() {
 
   const today = new Date().toLocaleDateString("en-US", { weekday: "long" });
 
+  // ✅ When debugging, treat whichever day is active as "today"
+  // so LIVE / PAST / SOON badges all work correctly
+  const effectiveToday = DEBUG_TIME ? (activeDay || today) : today;
+
   useEffect(() => {
     setActiveDay(DAYS.includes(today) ? today : "Monday");
   }, []);
@@ -108,14 +112,16 @@ export default function Timetable() {
   }, [user]);
 
   useEffect(() => {
-    if (currentRef.current && activeDay === today) {
+    if (currentRef.current && activeDay === effectiveToday) {
       currentRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
     }
   }, [timetable, activeDay]);
 
   const todaySchedule = timetable.find((t) => t.day === activeDay);
   const slots = todaySchedule?.slots || [];
-  const nextClass = activeDay === today ? getNextClass(slots) : null;
+
+  // ✅ Use effectiveToday so next class banner works in debug mode too
+  const nextClass = activeDay === effectiveToday ? getNextClass(slots) : null;
 
   // Modern time formatting
   let hours = now.getHours();
@@ -220,7 +226,7 @@ export default function Timetable() {
         </div>
 
         {/* ── Next Class Banner ── */}
-        {activeDay === today && nextClass && (
+        {activeDay === effectiveToday && nextClass && (
           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 mb-5 flex items-center gap-4">
             <div className="w-10 h-10 bg-amber-500/10 rounded-xl flex items-center justify-center flex-shrink-0 text-xl">⏰</div>
             <div className="flex-1 min-w-0">
@@ -268,13 +274,14 @@ export default function Timetable() {
         ) : (
           <div className="space-y-2">
             {slots.map((slot, i) => {
-              const isCurrent = activeDay === today && isCurrentSlot(slot);
-              const upcoming = activeDay === today && isUpcoming(slot);
-              const past = activeDay === today && isPast(slot);
-              const progress = isCurrent ? getProgress(slot) : 0;
-              const timeLeft = isCurrent ? getTimeLeft(slot) : "";
-              const duration = parseEndTime(slot.time) - parseTime(slot.time);
-              const isLab = slot.subject?.toLowerCase().includes("lab") || duration >= 90;
+              // ✅ All use effectiveToday so debug mode works correctly
+              const isCurrent = activeDay === effectiveToday && isCurrentSlot(slot);
+              const upcoming  = activeDay === effectiveToday && isUpcoming(slot);
+              const past      = activeDay === effectiveToday && isPast(slot);
+              const progress  = isCurrent ? getProgress(slot) : 0;
+              const timeLeft  = isCurrent ? getTimeLeft(slot) : "";
+              const duration  = parseEndTime(slot.time) - parseTime(slot.time);
+              const isLab     = slot.subject?.toLowerCase().includes("lab") || duration >= 90;
 
               return (
                 <div key={i}
@@ -297,26 +304,22 @@ export default function Timetable() {
                   {/* Left accent */}
                   <div className={`absolute left-0 top-3 bottom-3 w-0.5 rounded-full ${
                     isCurrent ? "bg-amber-500"
-                    : isLab ? "bg-violet-500"
+                    : isLab    ? "bg-violet-500"
                     : upcoming ? "bg-yellow-500"
-                    : past ? "bg-zinc-700"
                     : "bg-zinc-700"
                   }`} />
 
                   {/* Progress bar */}
                   {isCurrent && (
                     <div className="absolute bottom-0 left-0 h-0.5 transition-all duration-1000"
-                      style={{
-                        width: `${progress}%`,
-                        background: "linear-gradient(90deg, #f59e0b, #ef4444)"
-                      }} />
+                      style={{ width: `${progress}%`, background: "linear-gradient(90deg, #f59e0b, #ef4444)" }} />
                   )}
 
                   <div className="pl-4 pr-4 py-3.5 flex items-center gap-3">
                     {/* Period badge */}
                     <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-black ${
                       isCurrent ? "bg-amber-500 text-white"
-                      : isLab ? "bg-violet-500/20 text-violet-400"
+                      : isLab   ? "bg-violet-500/20 text-violet-400"
                       : "bg-zinc-800 text-zinc-500"
                     }`}>
                       {isCurrent ? "▶" : `P${i + 1}`}
@@ -358,7 +361,7 @@ export default function Timetable() {
                       </div>
                       <div className="flex gap-3 mt-0.5">
                         {slot.teacher && <span className="text-xs text-zinc-600 truncate">👤 {slot.teacher}</span>}
-                        {slot.room && <span className="text-xs text-zinc-600 flex-shrink-0">📍 {slot.room}</span>}
+                        {slot.room    && <span className="text-xs text-zinc-600 flex-shrink-0">📍 {slot.room}</span>}
                       </div>
                     </div>
 
@@ -377,15 +380,15 @@ export default function Timetable() {
         )}
 
         {/* ── Summary ── */}
-        {activeDay === today && slots.length > 0 && (
+        {activeDay === effectiveToday && slots.length > 0 && (
           <div className="mt-5 bg-zinc-900 border border-zinc-800 rounded-2xl p-4">
             <p className="text-zinc-600 text-xs uppercase tracking-widest mb-3 font-bold">Today</p>
             <div className="grid grid-cols-4 gap-2">
               {[
                 { label: "Total", value: slots.length, color: "text-white" },
-                { label: "Done", value: slots.filter(s => isPast(s)).length, color: "text-emerald-400" },
-                { label: "Left", value: slots.filter(s => !isPast(s) && !isCurrentSlot(s)).length, color: "text-amber-400" },
-                { label: "Labs", value: slots.filter(s => s.subject?.toLowerCase().includes("lab") || (parseEndTime(s.time) - parseTime(s.time)) >= 90).length, color: "text-violet-400" },
+                { label: "Done",  value: slots.filter(s => isPast(s)).length, color: "text-emerald-400" },
+                { label: "Left",  value: slots.filter(s => !isPast(s) && !isCurrentSlot(s)).length, color: "text-amber-400" },
+                { label: "Labs",  value: slots.filter(s => s.subject?.toLowerCase().includes("lab") || (parseEndTime(s.time) - parseTime(s.time)) >= 90).length, color: "text-violet-400" },
               ].map(({ label, value, color }) => (
                 <div key={label} className="bg-zinc-800 rounded-xl p-3 text-center">
                   <p className={`text-xl font-black ${color}`}>{value}</p>
