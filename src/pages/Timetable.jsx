@@ -5,6 +5,19 @@ import api from "../api/axios";
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
+// ✅ SET THIS TO TEST — e.g. "09:30" to simulate 9:30 AM
+// Set to null for real time
+const DEBUG_TIME = null;
+
+function getNowMinutes() {
+  if (DEBUG_TIME) {
+    const [h, m] = DEBUG_TIME.split(":").map(Number);
+    return h * 60 + m;
+  }
+  const now = new Date();
+  return now.getHours() * 60 + now.getMinutes();
+}
+
 function parseTime(timeStr) {
   const str = timeStr.split("-")[0].trim();
   const [h, m] = str.split(":").map(Number);
@@ -16,10 +29,6 @@ function parseEndTime(timeStr) {
   const str = parts[1].trim();
   const [h, m] = str.split(":").map(Number);
   return h * 60 + (m || 0);
-}
-function getNowMinutes() {
-  const now = new Date();
-  return now.getHours() * 60 + now.getMinutes();
 }
 function getProgress(slot) {
   const start = parseTime(slot.time);
@@ -66,7 +75,15 @@ export default function Timetable() {
   const [timetable, setTimetable] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeDay, setActiveDay] = useState("");
-  const [now, setNow] = useState(new Date());
+  const [now, setNow] = useState(() => {
+    if (DEBUG_TIME) {
+      const d = new Date();
+      const [h, m] = DEBUG_TIME.split(":").map(Number);
+      d.setHours(h, m, 0);
+      return d;
+    }
+    return new Date();
+  });
   const currentRef = useRef(null);
 
   const today = new Date().toLocaleDateString("en-US", { weekday: "long" });
@@ -76,6 +93,7 @@ export default function Timetable() {
   }, []);
 
   useEffect(() => {
+    if (DEBUG_TIME) return; // don't tick when debugging
     const timer = setInterval(() => setNow(new Date()), 30000);
     return () => clearInterval(timer);
   }, []);
@@ -147,7 +165,7 @@ export default function Timetable() {
   );
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-zinc-950">
       <div className="max-w-2xl mx-auto px-4 py-6 pb-24">
 
         {/* ── Top Bar ── */}
@@ -160,20 +178,24 @@ export default function Timetable() {
             <h1 className="text-xl font-black text-white leading-none tracking-tight">Timetable</h1>
             <p className="text-zinc-500 text-xs mt-0.5">{user.branch} • Year {user.year} • Sec {user.section}</p>
           </div>
+          {/* Debug indicator */}
+          {DEBUG_TIME && (
+            <span className="ml-auto bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 text-xs px-2 py-1 rounded-lg font-bold">
+              🧪 {DEBUG_TIME}
+            </span>
+          )}
         </div>
 
         {/* ── Modern Clock Card ── */}
         <div className="rounded-3xl p-6 mb-5 relative overflow-hidden"
           style={{ background: "linear-gradient(135deg, #1c1917 0%, #292524 50%, #1c1917 100%)", border: "1px solid #3f3f46" }}>
 
-          {/* Decorative glow */}
           <div className="absolute top-0 right-0 w-40 h-40 rounded-full opacity-20"
             style={{ background: "radial-gradient(circle, #f59e0b, transparent)", transform: "translate(30%, -30%)" }} />
           <div className="absolute bottom-0 left-0 w-32 h-32 rounded-full opacity-10"
             style={{ background: "radial-gradient(circle, #ef4444, transparent)", transform: "translate(-30%, 30%)" }} />
 
           <div className="relative flex items-end justify-between">
-            {/* Big time */}
             <div>
               <div className="flex items-start gap-1">
                 <span className="text-7xl font-black text-white tabular-nums leading-none" style={{ letterSpacing: "-4px" }}>
@@ -186,7 +208,6 @@ export default function Timetable() {
               <p className="text-zinc-400 text-sm mt-2">{dateStr}</p>
             </div>
 
-            {/* Chips */}
             <div className="flex flex-col gap-1.5 items-end">
               <span className="bg-amber-500/20 text-amber-400 text-xs px-3 py-1 rounded-full font-bold border border-amber-500/30">
                 {user.branch}
