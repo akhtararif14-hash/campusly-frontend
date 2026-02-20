@@ -312,23 +312,36 @@ export default function Assignments() {
                 </div>
               )}
 
-              {/* Assigned info */}
-              {selected.status === "assigned" && selected.assignedTo && (
-                <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-3 flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-xs font-bold text-blue-400">
-                    {selected.assignedTo?.name?.charAt(0)}
-                  </div>
-                  <div>
-                    <p className="text-blue-400 text-xs font-bold">Assigned to</p>
-                    <p className="text-white text-sm font-semibold">{selected.assignedTo?.name}</p>
-                    <p className="text-blue-400 text-xs">for ₹{selected.acceptedBid}</p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+             {/* Assigned info + Message button */}
+{selected.status === "assigned" && selected.assignedTo && (
+  <>
+    <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-3 flex items-center gap-3 mb-3">
+      <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-xs font-bold text-blue-400">
+        {selected.assignedTo?.name?.charAt(0)}
+      </div>
+      <div className="flex-1">
+        <p className="text-blue-400 text-xs font-bold">Assigned to</p>
+        <p className="text-white text-sm font-semibold">{selected.assignedTo?.name}</p>
+        <p className="text-blue-400 text-xs">for ₹{selected.acceptedBid}</p>
+      </div>
+    </div>
+
+    {/* ✅ Message button — shows for both poster and assigned person */}
+    <button
+      onClick={() => {
+        // If I'm the poster → message the assigned person
+        // If I'm the assigned person → message the poster
+        const chatWith = isOwner
+          ? selected.assignedTo?._id
+          : selected.postedBy?._id;
+        navigate(`/Chat/${chatWith}`);
+      }}
+      className="w-full flex items-center justify-center gap-2 bg-indigo-500 hover:bg-indigo-600 text-white py-3 rounded-xl font-bold text-sm transition-all mb-3"
+    >
+      💬 Message {isOwner ? selected.assignedTo?.name : selected.postedBy?.name}
+    </button>
+  </>
+)}
 
       {/* ── Post Modal ── */}
       {showPost && (
