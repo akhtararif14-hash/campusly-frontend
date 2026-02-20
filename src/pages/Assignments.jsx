@@ -342,6 +342,10 @@ export default function Assignments() {
     </button>
   </>
 )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Post Modal ── */}
       {showPost && (
