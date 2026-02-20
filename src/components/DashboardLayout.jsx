@@ -112,13 +112,14 @@ export default function DashboardLayout() {
     { name: "Room", path: "/rooms", imgsrc: "/images/room.svg" },
     { name: "Attendance", path: "/attendance", imgsrc: "/images/attendance.svg" },
     { name: "Assignments", path: "/assignments", imgsrc: "/images/assignments.svg" },
+    { name: "Lost & Found", path: "/lostfound", imgsrc: "/images/lostfound.svg" },
 
     ...(user && (user.role === "seller" || user.role === "admin")
-      ? [{ name: "Seller Dashboard", path: "/seller", imgsrc: "/images/shoppingcart.png" }]
+      ? [{ name: "Seller Dashboard", path: "/seller", imgsrc: "/images/cart3.svg" }]
       : []),
 
     ...(user && user.role === "admin"
-      ? [{ name: "Admin Dashboard", path: "/admin", imgsrc: "/images/shoppingcart.png" }]
+      ? [{ name: "Admin Dashboard", path: "/admin", imgsrc: "/images/cart3.svg" }]
       : []),
   ];
 

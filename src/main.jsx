@@ -27,7 +27,7 @@ import RoomFinder from "./pages/RoomFinder";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import Attendance from "./pages/Attendance";
 import Assignments from "./pages/Assignments";
-
+import LostFound from "./pages/LostFound";
 
 const router = createBrowserRouter([
   // ✅ AUTH ROUTES (PUBLIC)
@@ -38,6 +38,10 @@ const router = createBrowserRouter([
   {
     path: "/assignments",
     element: <Assignments />,
+  },
+  {
+    path: "/lostfound",
+    element: <LostFound />,
   },
   {
     path: "/attendance", 
