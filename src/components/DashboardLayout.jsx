@@ -84,10 +84,6 @@ export default function DashboardLayout() {
     setTimeout(() => setAuthMsg(null), 3000);
   };
 
-  // authType:
-  //   null       → fully public, always opens
-  //   "login"    → needs login → shows "Login first" message
-  //   "profile"  → needs login + branch/year/section → shows "Setup profile first"
   const allLinks = [
     { name: "Home",          path: "/",           imgsrc: "/images/home.svg",        authType: null      },
     { name: "Campus Shop",   path: "/buy-sell",    imgsrc: "/images/cart.svg",        authType: null      },
@@ -97,7 +93,7 @@ export default function DashboardLayout() {
     { name: "Attendance",    path: "/attendance",  imgsrc: "/images/attendance.svg",  authType: "profile" },
     { name: "Assignments",   path: "/assignments", imgsrc: "/images/assignments.svg", authType: "profile" },
     { name: "Lost & Found",  path: "/lostfound",   imgsrc: "/images/lost.png",        authType: null      }, // ✅ open, post requires login (handled inside page)
-    { name: "Feedback",      path: "/feedback",    imgsrc: "/images/feedback.svg",    authType: "login"   },
+    { name: "Feedback",      path: "/feedback",    imgsrc: "/images/feedback.svg",    authType: null
 
     ...(user && (user.role === "seller" || user.role === "admin")
       ? [{ name: "Seller Dashboard", path: "/seller", imgsrc: "/images/cart3.svg", authType: null }]
