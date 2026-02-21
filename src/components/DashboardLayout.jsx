@@ -113,6 +113,7 @@ export default function DashboardLayout() {
     { name: "Attendance", path: "/attendance", imgsrc: "/images/attendance.svg" },
     { name: "Assignments", path: "/assignments", imgsrc: "/images/assignments.svg" },
     { name: "Lost & Found", path: "/lostfound", imgsrc: "/images/lost.png" },
+    { name: "Feedback", path: "/feedback", imgsrc: "/images/feedback.svg" },
 
     ...(user && (user.role === "seller" || user.role === "admin")
       ? [{ name: "Seller Dashboard", path: "/seller", imgsrc: "/images/cart3.svg" }]
