@@ -18,8 +18,6 @@ export default function DashboardLayout() {
 
   const [showPopup, setShowPopup] = useState(false);
   const [products, setProducts] = useState([]);
-
-  // ── toast for auth messages ──
   const [authMsg, setAuthMsg] = useState(null);
 
   useEffect(() => {
@@ -81,25 +79,24 @@ export default function DashboardLayout() {
     );
   };
 
-  const showAuthMsg = (msg) => {
+  const showAuthToast = (msg) => {
     setAuthMsg(msg);
     setTimeout(() => setAuthMsg(null), 3000);
   };
 
-  // ── All sidebar links ──
   // authType:
-  //   null         → fully public
-  //   "login"      → needs login → show "Login first" message
-  //   "profile"    → needs login + profile setup → show "Setup profile first" message
+  //   null       → fully public, always opens
+  //   "login"    → needs login → shows "Login first" message
+  //   "profile"  → needs login + branch/year/section → shows "Setup profile first"
   const allLinks = [
     { name: "Home",          path: "/",           imgsrc: "/images/home.svg",        authType: null      },
     { name: "Campus Shop",   path: "/buy-sell",    imgsrc: "/images/cart.svg",        authType: null      },
     { name: "Timetable",     path: "/timetable",   imgsrc: "/images/timetable.svg",   authType: "profile" },
-    { name: "PYQS & Notes",  path: "/resources",   imgsrc: "/images/book.svg",        authType: null      },
+    { name: "PYQS & Notes",  path: "/resources",   imgsrc: "/images/book.svg",        authType: "profile" }, // ✅ profile required
     { name: "Room",          path: "/rooms",       imgsrc: "/images/room.svg",        authType: null      },
     { name: "Attendance",    path: "/attendance",  imgsrc: "/images/attendance.svg",  authType: "profile" },
     { name: "Assignments",   path: "/assignments", imgsrc: "/images/assignments.svg", authType: "profile" },
-    { name: "Lost & Found",  path: "/lostfound",   imgsrc: "/images/lost.png",        authType: "login"   },
+    { name: "Lost & Found",  path: "/lostfound",   imgsrc: "/images/lost.png",        authType: null      }, // ✅ open, post requires login (handled inside page)
     { name: "Feedback",      path: "/feedback",    imgsrc: "/images/feedback.svg",    authType: "login"   },
 
     ...(user && (user.role === "seller" || user.role === "admin")
@@ -115,23 +112,22 @@ export default function DashboardLayout() {
   ];
 
   const handleNavClick = (e, link) => {
-    if (!link.authType) return; // public, allow
+    if (!link.authType) return; // public, allow through
 
     if (!user) {
       e.preventDefault();
       if (link.authType === "profile") {
-        showAuthMsg("⚙️ Please setup your profile first (Branch, Year & Section)");
+        showAuthToast("⚙️ Please setup your profile first — add Branch, Year & Section");
       } else {
-        showAuthMsg("🔐 Please login first to access this feature");
+        showAuthToast("🔐 Please login first to access this feature");
       }
       return;
     }
 
-    // logged in but profile not set up
+    // logged in but profile incomplete
     if (link.authType === "profile" && (!user.branch || !user.year || !user.section)) {
       e.preventDefault();
-      showAuthMsg("⚙️ Please setup your profile first — add Branch, Year & Section");
-      return;
+      showAuthToast("⚙️ Please setup your profile first — add Branch, Year & Section");
     }
   };
 
@@ -139,7 +135,7 @@ export default function DashboardLayout() {
     <div className="overflow-hidden h-screen">
       <Navbar />
 
-      {/* Cart popup */}
+      {/* Cart added popup */}
       {showPopup && (
         <div className="fixed bottom-5 right-5 bg-white text-black px-6 py-3 rounded-xl shadow-lg z-50">
           ✅ Added to cart
