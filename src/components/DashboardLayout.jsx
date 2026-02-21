@@ -6,7 +6,6 @@ import { useAuth } from "../context/AuthContext";
 export default function DashboardLayout() {
   const { user } = useAuth();
 
-  // ✅ Load cart from localStorage on mount
   const [cart, setCart] = useState(() => {
     try {
       const savedCart = localStorage.getItem("cart");
@@ -20,7 +19,6 @@ export default function DashboardLayout() {
   const [showPopup, setShowPopup] = useState(false);
   const [products, setProducts] = useState([]);
 
-  // ✅ Save cart to localStorage whenever it changes
   useEffect(() => {
     try {
       localStorage.setItem("cart", JSON.stringify(cart));
@@ -29,10 +27,7 @@ export default function DashboardLayout() {
     }
   }, [cart]);
 
-  // 🔑 normalize id (MongoDB + local)
   const getItemId = (item) => item._id || item.id;
-
-  // ================= CART LOGIC =================
 
   const clearCart = () => {
     setCart([]);
@@ -40,7 +35,6 @@ export default function DashboardLayout() {
   };
 
   const addToCart = (product) => {
-    // 🚨 SAFETY CHECK
     if (!product.sellerId) {
       console.error("Product missing sellerId:", product);
       alert("This product cannot be added to cart");
@@ -49,10 +43,7 @@ export default function DashboardLayout() {
 
     setCart((prev) => {
       const productId = getItemId(product);
-
-      const existing = prev.find(
-        (item) => getItemId(item) === productId
-      );
+      const existing = prev.find((item) => getItemId(item) === productId);
 
       if (existing) {
         return prev.map((item) =>
@@ -62,16 +53,15 @@ export default function DashboardLayout() {
         );
       }
 
-      // ✅ FIXED CART SHAPE (IMAGE ADDED)
       return [
         ...prev,
         {
           _id: product._id,
           title: product.title,
           price: product.price,
-          image: product.image,        // ✅ IMAGE FIX
+          image: product.image,
           quantity: 1,
-          sellerId: product.sellerId,  // ✅ REQUIRED FOR ORDERS
+          sellerId: product.sellerId,
         },
       ];
     });
@@ -102,29 +92,37 @@ export default function DashboardLayout() {
     );
   };
 
-  // ================= SIDEBAR =================
+  // ✅ Links shown to everyone (no login required)
+  const publicLinks = [
+    { name: "Home",        path: "/",           imgsrc: "/images/home.svg" },
+    { name: "Campus Shop", path: "/buy-sell",   imgsrc: "/images/cart.svg" },
+    { name: "Timetable",   path: "/timetable",  imgsrc: "/images/timetable.svg" },
+    { name: "PYQS & Notes",path: "/resources",  imgsrc: "/images/book.svg" },
+    { name: "Room",        path: "/rooms",      imgsrc: "/images/room.svg" },
+  ];
 
-  const sidebarLinks = [
-    { name: "Home", path: "/", imgsrc: "/images/home.svg" },
-    { name: "Campus Shop", path: "/buy-sell", imgsrc: "/images/cart.svg" },
-    { name: "Timetable", path: "/timetable", imgsrc: "/images/timetable.svg" },
-    { name: "PYQS & Notes", path: "/resources", imgsrc: "/images/book.svg" },
-    { name: "Room", path: "/rooms", imgsrc: "/images/room.svg" },
-    { name: "Attendance", path: "/attendance", imgsrc: "/images/attendance.svg" },
+  // ✅ Links shown only when logged in
+  const privateLinks = user ? [
+    { name: "Attendance",  path: "/attendance",  imgsrc: "/images/attendance.svg" },
     { name: "Assignments", path: "/assignments", imgsrc: "/images/assignments.svg" },
-    { name: "Lost & Found", path: "/lostfound", imgsrc: "/images/lost.png" },
-    { name: "Feedback", path: "/feedback", imgsrc: "/images/feedback.svg" },
+    { name: "Lost & Found",path: "/lost-found",  imgsrc: "/images/lost.png" },
+    { name: "Feedback",    path: "/feedback",    imgsrc: "/images/feedback.svg" }, // ✅ only logged in users
+  ] : [];
 
+  // ✅ Role-based links
+  const roleLinks = [
     ...(user && (user.role === "seller" || user.role === "admin")
       ? [{ name: "Seller Dashboard", path: "/seller", imgsrc: "/images/cart3.svg" }]
       : []),
-
     ...(user && user.role === "admin"
-      ? [{ name: "Admin Dashboard", path: "/admin", imgsrc: "/images/cart3.svg" }]
+      ? [
+          { name: "Admin Dashboard", path: "/admin",           imgsrc: "/images/cart3.svg" },
+          { name: "Feedback Inbox",  path: "/admin/feedback",  imgsrc: "/images/feedback.svg" },
+        ]
       : []),
   ];
 
-  // ================= UI =================
+  const sidebarLinks = [...publicLinks, ...privateLinks, ...roleLinks];
 
   return (
     <div className="overflow-hidden h-screen">
@@ -138,18 +136,16 @@ export default function DashboardLayout() {
 
       <div className="flex">
         {/* Sidebar */}
-        <div className="flex flex-col p-2 sm:w-56 w-12 text-md space-y-2 pb-28  bg-gray-100 overflow-y-auto h-screen">
+        <div className="flex flex-col p-2 sm:w-56 w-12 text-md space-y-2 pb-28 bg-gray-100 overflow-y-auto h-screen">
           {sidebarLinks.map((item) => (
             <NavLink
               key={item.name}
               to={item.path}
               className={({ isActive }) =>
-                `p-2 rounded-sm text-black ${
-                  isActive ? "bg-blue-200 font-bold" : ""
-                }`
+                `p-2 rounded-sm text-black ${isActive ? "bg-blue-200 font-bold" : ""}`
               }
             >
-              <div className="flex gap-1  items-center">
+              <div className="flex gap-1 items-center">
                 <img className="w-[23px]" src={item.imgsrc} alt="icon" />
                 <p className="sm:block hidden">{item.name}</p>
               </div>
@@ -158,7 +154,7 @@ export default function DashboardLayout() {
         </div>
 
         {/* Content */}
-        <div  className="flex-col w-full hide-scrollbar  m-1 mb-8 sm:p-2 md:p-4 bg-white overflow-y-auto h-screen space-y-10 pb-40">
+        <div className="flex-col w-full hide-scrollbar m-1 mb-8 sm:p-2 md:p-4 bg-white overflow-y-auto h-screen space-y-10 pb-40">
           <Outlet
             context={{
               cart,
