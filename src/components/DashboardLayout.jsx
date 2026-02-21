@@ -91,14 +91,14 @@ export default function DashboardLayout() {
     { name: "Home", path: "/", imgsrc: "/images/home.svg", authType: null },
     { name: "Campus Shop", path: "/buy-sell", imgsrc: "/images/cart.svg", authType: null },
     { name: "Timetable", path: "/timetable", imgsrc: "/images/timetable.svg", authType: "profile" },
-    { name: "PYQS & Notes", path: "/resources", imgsrc: "/images/book.svg", authType: "profile" }, // ✅ profile required
-    { name: "Room", path: "/rooms", imgsrc: "/images/room.svg", authType: null },
     { name: "Attendance", path: "/attendance", imgsrc: "/images/attendance.svg", authType: "profile" },
-    { name: "Assignments", path: "/assignments", imgsrc: "/images/assignments.svg", authType: "profile" },
-    { name: "Lost & Found", path: "/lostfound", imgsrc: "/images/cart.svg", authType: null }, // ✅ open, post requires login (handled inside page)
-    { name: "Feedback", path: "/feedback", imgsrc: "/images/home.svg", authType: "login" },
+    { name: "PYQS & Notes", path: "/resources", imgsrc: "/images/book.svg", authType: "profile" },
     { name: "JMI Alert", path: "/jmi-alert", imgsrc: "/images/noti.svg", authType: null },
-
+    { name: "Room", path: "/rooms", imgsrc: "/images/room.svg", authType: null },
+    { name: "Assignments", path: "/assignments", imgsrc: "/images/assignments.svg", authType: "profile" },
+    { name: "Lost & Found", path: "/lostfound", imgsrc: "/images/lost.png", authType: null }, // ✅ open, post requires login (handled inside page)
+    { name: "Feedback", path: "/feedback", imgsrc: "/images/feedback.svg", authType: "login" },
+    
     ...(user && (user.role === "seller" || user.role === "admin")
       ? [{ name: "Seller Dashboard", path: "/seller", imgsrc: "/images/cart3.svg", authType: null }]
       : []),
