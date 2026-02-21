@@ -43,12 +43,6 @@ const router = createBrowserRouter([
   { path: "/assignments", element: <Assignments /> },
   { path: "/lostfound",   element: <LostFound /> },
   { path: "feedback", element: <ProtectedRoute><Feedback /></ProtectedRoute> },
-  { index: true,           element: <DashboardHome /> },
-      { path: "buy-sell",      element: <BuySell /> },
-      { path: "cart",          element: <Cart /> },
-      { path: "checkout",      element: <Checkout /> },
-      { path: "order-success", element: <OrderSuccess /> },
-      { path: "user/:userId",  element: <UserProfile /> },
 
   // ❌ REMOVED: { path: "/feedback", element: <Feedback /> }
   // ❌ REMOVED: { path: "/admin/feedback", ... }
@@ -64,7 +58,12 @@ const router = createBrowserRouter([
     element: <DashboardLayout />,
     errorElement: <NotFound />,
     children: [
-      
+      { index: true,           element: <DashboardHome /> },
+      { path: "buy-sell",      element: <BuySell /> },
+      { path: "cart",          element: <Cart /> },
+      { path: "checkout",      element: <Checkout /> },
+      { path: "order-success", element: <OrderSuccess /> },
+      { path: "user/:userId",  element: <UserProfile /> },
       
 
       // ── protected ──
