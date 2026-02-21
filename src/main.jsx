@@ -28,7 +28,6 @@ import Attendance from "./pages/Attendance";
 import Assignments from "./pages/Assignments";
 import LostFound from "./pages/LostFound";
 import Feedback from "./pages/Feedback";
-import AdminFeedback from "./pages/AdminFeedback";
 
 const router = createBrowserRouter([
   // ── PUBLIC AUTH ──
@@ -74,9 +73,6 @@ const router = createBrowserRouter([
       // ── role based ──
       { path: "seller", element: <ProtectedRoute roles={["seller", "admin"]}><SellerDashboard /></ProtectedRoute> },
       { path: "admin",  element: <ProtectedRoute roles={["admin"]}><AdminDashboard /></ProtectedRoute> },
-
-      // ✅ admin feedback inbox — inside dashboard, admin only
-      { path: "admin/feedback", element: <ProtectedRoute roles={["admin"]}><AdminFeedback /></ProtectedRoute> },
     ],
   },
 
