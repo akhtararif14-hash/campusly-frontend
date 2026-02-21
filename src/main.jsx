@@ -43,6 +43,7 @@ const router = createBrowserRouter([
   { path: "/attendance",  element: <Attendance /> },
   { path: "/assignments", element: <Assignments /> },
   { path: "/lostfound",   element: <LostFound /> },
+  { path: "/feedback",    element: <ProtectedRoute><Feedback /></ProtectedRoute> },
 
   // ── CHAT (protected, standalone) ──
   { path: "/Chat/:userId", element: <ProtectedRoute><Chat /></ProtectedRoute> },
