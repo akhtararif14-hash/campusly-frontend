@@ -28,6 +28,8 @@ import { SpeedInsights } from "@vercel/speed-insights/react";
 import Attendance from "./pages/Attendance";
 import Assignments from "./pages/Assignments";
 import LostFound from "./pages/LostFound";
+import Feedback from "./pages/Feedback";
+import AdminFeedback from "./pages/AdminFeedback";
 
 const router = createBrowserRouter([
   // ✅ AUTH ROUTES (PUBLIC)
@@ -39,6 +41,16 @@ const router = createBrowserRouter([
     path: "/assignments",
     element: <Assignments />,
   },
+  { path: "/feedback", 
+    element: <Feedback /> 
+  },
+{ path: "/admin/feedback", 
+  element: (
+    <ProtectedRoute roles={["admin"]}>
+      <AdminFeedback />
+    </ProtectedRoute>
+  )
+},
   {
     path: "/lostfound",
     element: <LostFound />,
