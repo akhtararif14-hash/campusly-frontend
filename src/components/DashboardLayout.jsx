@@ -7,14 +7,17 @@ export default function DashboardLayout() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const [cart, setCart] = useState(() => {
-    try {
-      const savedCart = localStorage.getItem("cart");
-      return savedCart ? JSON.parse(savedCart) : [];
-    } catch (error) {
-      return [];
-    }
-  });
+ // ✅ Fixed — handles "undefined" string and null safely
+const [cart, setCart] = useState(() => {
+  try {
+    const savedCart = localStorage.getItem("cart");
+    if (!savedCart || savedCart === "undefined" || savedCart === "null") return [];
+    return JSON.parse(savedCart);
+  } catch (error) {
+    localStorage.removeItem("cart"); // clear the bad value
+    return [];
+  }
+});
 
   const [showPopup, setShowPopup] = useState(false);
   const [products, setProducts] = useState([]);
