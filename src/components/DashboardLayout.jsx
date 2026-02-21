@@ -96,7 +96,7 @@ const [cart, setCart] = useState(() => {
     { name: "Attendance",    path: "/attendance",  imgsrc: "/images/attendance.svg",  authType: "profile" },
     { name: "Assignments",   path: "/assignments", imgsrc: "/images/assignments.svg", authType: "profile" },
     { name: "Lost & Found",  path: "/lostfound",   imgsrc: "/images/lost.png",        authType: null      }, // ✅ open, post requires login (handled inside page)
-    { name: "Feedback",      path: "/feedback",    imgsrc: "/images/feedback.svg",    authType: "login"   },
+    { name: "Feedback",      path: "/feedback",    imgsrc: "/images/feedback.svg",    authType: null      }, // ✅ open, post requires login (handled inside page)
 
     ...(user && (user.role === "seller" || user.role === "admin")
       ? [{ name: "Seller Dashboard", path: "/seller", imgsrc: "/images/cart3.svg", authType: null }]
