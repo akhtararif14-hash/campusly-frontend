@@ -7,17 +7,17 @@ export default function DashboardLayout() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
- // ✅ Fixed — handles "undefined" string and null safely
-const [cart, setCart] = useState(() => {
-  try {
-    const savedCart = localStorage.getItem("cart");
-    if (!savedCart || savedCart === "undefined" || savedCart === "null") return [];
-    return JSON.parse(savedCart);
-  } catch (error) {
-    localStorage.removeItem("cart"); // clear the bad value
-    return [];
-  }
-});
+  // ✅ Fixed — handles "undefined" string and null safely
+  const [cart, setCart] = useState(() => {
+    try {
+      const savedCart = localStorage.getItem("cart");
+      if (!savedCart || savedCart === "undefined" || savedCart === "null") return [];
+      return JSON.parse(savedCart);
+    } catch (error) {
+      localStorage.removeItem("cart"); // clear the bad value
+      return [];
+    }
+  });
 
   const [showPopup, setShowPopup] = useState(false);
   const [products, setProducts] = useState([]);
@@ -26,7 +26,7 @@ const [cart, setCart] = useState(() => {
   useEffect(() => {
     try {
       localStorage.setItem("cart", JSON.stringify(cart));
-    } catch (error) {}
+    } catch (error) { }
   }, [cart]);
 
   const getItemId = (item) => item._id || item.id;
@@ -88,15 +88,15 @@ const [cart, setCart] = useState(() => {
   };
 
   const allLinks = [
-    { name: "Home",          path: "/",           imgsrc: "/images/home.svg",        authType: null      },
-    { name: "Campus Shop",   path: "/buy-sell",    imgsrc: "/images/cart.svg",        authType: null      },
-    { name: "Timetable",     path: "/timetable",   imgsrc: "/images/timetable.svg",   authType: "profile" },
-    { name: "PYQS & Notes",  path: "/resources",   imgsrc: "/images/book.svg",        authType: "profile" }, // ✅ profile required
-    { name: "Room",          path: "/rooms",       imgsrc: "/images/room.svg",        authType: null      },
-    { name: "Attendance",    path: "/attendance",  imgsrc: "/images/attendance.svg",  authType: "profile" },
-    { name: "Assignments",   path: "/assignments", imgsrc: "/images/assignments.svg", authType: "profile" },
-    { name: "Lost & Found",  path: "/lostfound",   imgsrc: "/images/lost.png",        authType: null      }, // ✅ open, post requires login (handled inside page)
-    { name: "Feedback",      path: "/feedback",    imgsrc: "/images/feedback.svg",    authType: null      }, // ✅ open, post requires login (handled inside page)
+    { name: "Home", path: "/", imgsrc: "/images/home.svg", authType: null },
+    { name: "Campus Shop", path: "/buy-sell", imgsrc: "/images/cart.svg", authType: null },
+    { name: "Timetable", path: "/timetable", imgsrc: "/images/timetable.svg", authType: "profile" },
+    { name: "PYQS & Notes", path: "/resources", imgsrc: "/images/book.svg", authType: "profile" }, // ✅ profile required
+    { name: "Room", path: "/rooms", imgsrc: "/images/room.svg", authType: null },
+    { name: "Attendance", path: "/attendance", imgsrc: "/images/attendance.svg", authType: "profile" },
+    { name: "Assignments", path: "/assignments", imgsrc: "/images/assignments.svg", authType: "profile" },
+    { name: "Lost & Found", path: "/lostfound", imgsrc: "/images/cart.svg", authType: null }, // ✅ open, post requires login (handled inside page)
+    { name: "Feedback", path: "/feedback", imgsrc: "/images/home.svg", authType: "login" },
 
     ...(user && (user.role === "seller" || user.role === "admin")
       ? [{ name: "Seller Dashboard", path: "/seller", imgsrc: "/images/cart3.svg", authType: null }]
@@ -104,9 +104,9 @@ const [cart, setCart] = useState(() => {
 
     ...(user && user.role === "admin"
       ? [
-          { name: "Admin Dashboard", path: "/admin",          imgsrc: "/images/cart3.svg",    authType: null },
-          { name: "Feedback Inbox",  path: "/admin/feedback", imgsrc: "/images/feedback.svg", authType: null },
-        ]
+        { name: "Admin Dashboard", path: "/admin", imgsrc: "/images/cart3.svg", authType: null },
+        { name: "Feedback Inbox", path: "/admin/feedback", imgsrc: "/images/feedback.svg", authType: null },
+      ]
       : []),
   ];
 
