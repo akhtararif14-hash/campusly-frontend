@@ -97,6 +97,7 @@ export default function DashboardLayout() {
     { name: "Assignments", path: "/assignments", imgsrc: "/images/assignments.svg", authType: "profile" },
     { name: "Lost & Found", path: "/lostfound", imgsrc: "/images/cart.svg", authType: null }, // ✅ open, post requires login (handled inside page)
     { name: "Feedback", path: "/feedback", imgsrc: "/images/home.svg", authType: "login" },
+    { name: "JMI Alert", path: "/jmi-alert", imgsrc: "/images/jmi.svg", authType: null },
 
     ...(user && (user.role === "seller" || user.role === "admin")
       ? [{ name: "Seller Dashboard", path: "/seller", imgsrc: "/images/cart3.svg", authType: null }]

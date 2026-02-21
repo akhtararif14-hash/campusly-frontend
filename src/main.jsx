@@ -28,6 +28,7 @@ import Attendance from "./pages/Attendance";
 import Assignments from "./pages/Assignments";
 import LostFound from "./pages/LostFound";
 import Feedback from "./pages/Feedback";
+import JMIAlert from "./pages/JMIAlert";
 
 const router = createBrowserRouter([
   // ── PUBLIC AUTH ──
@@ -43,6 +44,7 @@ const router = createBrowserRouter([
   { path: "/assignments", element: <Assignments /> },
   { path: "/lostfound",   element: <LostFound /> },
   { path: "feedback", element: <ProtectedRoute><Feedback /></ProtectedRoute> },
+  { path: "/jmi-alert", element: <JMIAlert /> },
 
   // ❌ REMOVED: { path: "/feedback", element: <Feedback /> }
   // ❌ REMOVED: { path: "/admin/feedback", ... }
