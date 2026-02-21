@@ -43,7 +43,9 @@ const router = createBrowserRouter([
   { path: "/attendance",  element: <Attendance /> },
   { path: "/assignments", element: <Assignments /> },
   { path: "/lostfound",   element: <LostFound /> },
-  { path: "/feedback",    element: <Feedback /> },
+  // ❌ REMOVED: { path: "/feedback", element: <Feedback /> }
+  // ❌ REMOVED: { path: "/admin/feedback", ... }
+  // Both feedback routes now live inside dashboard children below
 
   // ── CHAT (protected, standalone) ──
   { path: "/Chat/:userId", element: <ProtectedRoute><Chat /></ProtectedRoute> },
@@ -55,25 +57,25 @@ const router = createBrowserRouter([
     element: <DashboardLayout />,
     errorElement: <NotFound />,
     children: [
-      { index: true,               element: <DashboardHome /> },
-      { path: "buy-sell",          element: <BuySell /> },
-      { path: "cart",              element: <Cart /> },
-      { path: "checkout",          element: <Checkout /> },
-      { path: "order-success",     element: <OrderSuccess /> },
-      { path: "user/:userId",      element: <UserProfile /> },
+      { index: true,           element: <DashboardHome /> },
+      { path: "buy-sell",      element: <BuySell /> },
+      { path: "cart",          element: <Cart /> },
+      { path: "checkout",      element: <Checkout /> },
+      { path: "order-success", element: <OrderSuccess /> },
+      { path: "user/:userId",  element: <UserProfile /> },
 
-      // protected
-      { path: "profile",  element: <ProtectedRoute><Profile /></ProtectedRoute> },
-      { path: "setting",  element: <ProtectedRoute><Setting /></ProtectedRoute> },
+      // ── protected ──
+      { path: "profile", element: <ProtectedRoute><Profile /></ProtectedRoute> },
+      { path: "setting", element: <ProtectedRoute><Setting /></ProtectedRoute> },
 
-      // ✅ feedback — inside dashboard layout, requires login
+      // ✅ feedback — inside dashboard, requires login, shows with sidebar
       { path: "feedback", element: <ProtectedRoute><Feedback /></ProtectedRoute> },
 
-      // role based
-      { path: "seller",         element: <ProtectedRoute roles={["seller", "admin"]}><SellerDashboard /></ProtectedRoute> },
-      { path: "admin",          element: <ProtectedRoute roles={["admin"]}><AdminDashboard /></ProtectedRoute> },
+      // ── role based ──
+      { path: "seller", element: <ProtectedRoute roles={["seller", "admin"]}><SellerDashboard /></ProtectedRoute> },
+      { path: "admin",  element: <ProtectedRoute roles={["admin"]}><AdminDashboard /></ProtectedRoute> },
 
-      // ✅ admin feedback inbox — inside dashboard layout, admin only
+      // ✅ admin feedback inbox — inside dashboard, admin only
       { path: "admin/feedback", element: <ProtectedRoute roles={["admin"]}><AdminFeedback /></ProtectedRoute> },
     ],
   },
