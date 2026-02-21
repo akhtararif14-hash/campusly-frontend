@@ -28,7 +28,7 @@ import Attendance from "./pages/Attendance";
 import Assignments from "./pages/Assignments";
 import LostFound from "./pages/LostFound";
 import Feedback from "./pages/Feedback";
-import AdminFeedback from "./pages/AdminFeedback.jsx";
+import AdminFeedback from "./pages/AdminFeedback";
 
 const router = createBrowserRouter([
   // ── PUBLIC AUTH ──
