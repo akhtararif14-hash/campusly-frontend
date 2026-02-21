@@ -19,6 +19,9 @@ export default function DashboardLayout() {
   const [showPopup, setShowPopup] = useState(false);
   const [products, setProducts] = useState([]);
 
+  // ── toast for auth messages ──
+  const [authMsg, setAuthMsg] = useState(null);
+
   useEffect(() => {
     try {
       localStorage.setItem("cart", JSON.stringify(cart));
@@ -78,38 +81,57 @@ export default function DashboardLayout() {
     );
   };
 
-  // ── All sidebar links ──────────────────────────────────────────────────────
-  // requiresAuth: true  → show to everyone, but clicking redirects to login if not logged in
-  // requiresAuth: false → fully public
-  const allLinks = [
-    { name: "Home",           path: "/",            imgsrc: "/images/home.svg",        requiresAuth: false },
-    { name: "Campus Shop",    path: "/buy-sell",     imgsrc: "/images/cart.svg",        requiresAuth: false },
-    { name: "Timetable",      path: "/timetable",    imgsrc: "/images/timetable.svg",   requiresAuth: true  },
-    { name: "PYQS & Notes",   path: "/resources",    imgsrc: "/images/book.svg",        requiresAuth: false },
-    { name: "Room",           path: "/rooms",        imgsrc: "/images/room.svg",        requiresAuth: false },
-    { name: "Attendance",     path: "/attendance",   imgsrc: "/images/attendance.svg",  requiresAuth: true  },
-    { name: "Assignments",    path: "/assignments",  imgsrc: "/images/assignments.svg", requiresAuth: true  },
-    { name: "Lost & Found",   path: "/lostfound",    imgsrc: "/images/lost.png",        requiresAuth: true  },
-    { name: "Feedback",       path: "/feedback",     imgsrc: "/images/feedback.svg",    requiresAuth: true  },
+  const showAuthMsg = (msg) => {
+    setAuthMsg(msg);
+    setTimeout(() => setAuthMsg(null), 3000);
+  };
 
-    // seller & admin
+  // ── All sidebar links ──
+  // authType:
+  //   null         → fully public
+  //   "login"      → needs login → show "Login first" message
+  //   "profile"    → needs login + profile setup → show "Setup profile first" message
+  const allLinks = [
+    { name: "Home",          path: "/",           imgsrc: "/images/home.svg",        authType: null      },
+    { name: "Campus Shop",   path: "/buy-sell",    imgsrc: "/images/cart.svg",        authType: null      },
+    { name: "Timetable",     path: "/timetable",   imgsrc: "/images/timetable.svg",   authType: "profile" },
+    { name: "PYQS & Notes",  path: "/resources",   imgsrc: "/images/book.svg",        authType: null      },
+    { name: "Room",          path: "/rooms",       imgsrc: "/images/room.svg",        authType: null      },
+    { name: "Attendance",    path: "/attendance",  imgsrc: "/images/attendance.svg",  authType: "profile" },
+    { name: "Assignments",   path: "/assignments", imgsrc: "/images/assignments.svg", authType: "profile" },
+    { name: "Lost & Found",  path: "/lostfound",   imgsrc: "/images/lost.png",        authType: "login"   },
+    { name: "Feedback",      path: "/feedback",    imgsrc: "/images/feedback.svg",    authType: "login"   },
+
     ...(user && (user.role === "seller" || user.role === "admin")
-      ? [{ name: "Seller Dashboard", path: "/seller", imgsrc: "/images/cart3.svg", requiresAuth: true }]
+      ? [{ name: "Seller Dashboard", path: "/seller", imgsrc: "/images/cart3.svg", authType: null }]
       : []),
 
-    // admin only
     ...(user && user.role === "admin"
       ? [
-          { name: "Admin Dashboard", path: "/admin",          imgsrc: "/images/cart3.svg",   requiresAuth: true },
-          { name: "Feedback Inbox",  path: "/admin/feedback", imgsrc: "/images/feedback.svg", requiresAuth: true },
+          { name: "Admin Dashboard", path: "/admin",          imgsrc: "/images/cart3.svg",    authType: null },
+          { name: "Feedback Inbox",  path: "/admin/feedback", imgsrc: "/images/feedback.svg", authType: null },
         ]
       : []),
   ];
 
   const handleNavClick = (e, link) => {
-    if (link.requiresAuth && !user) {
+    if (!link.authType) return; // public, allow
+
+    if (!user) {
       e.preventDefault();
-      navigate("/login");
+      if (link.authType === "profile") {
+        showAuthMsg("⚙️ Please setup your profile first (Branch, Year & Section)");
+      } else {
+        showAuthMsg("🔐 Please login first to access this feature");
+      }
+      return;
+    }
+
+    // logged in but profile not set up
+    if (link.authType === "profile" && (!user.branch || !user.year || !user.section)) {
+      e.preventDefault();
+      showAuthMsg("⚙️ Please setup your profile first — add Branch, Year & Section");
+      return;
     }
   };
 
@@ -117,9 +139,17 @@ export default function DashboardLayout() {
     <div className="overflow-hidden h-screen">
       <Navbar />
 
+      {/* Cart popup */}
       {showPopup && (
         <div className="fixed bottom-5 right-5 bg-white text-black px-6 py-3 rounded-xl shadow-lg z-50">
           ✅ Added to cart
+        </div>
+      )}
+
+      {/* Auth message toast */}
+      {authMsg && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-zinc-900 text-white text-sm font-semibold px-5 py-3 rounded-2xl shadow-2xl border border-zinc-700 max-w-xs text-center">
+          {authMsg}
         </div>
       )}
 
@@ -132,19 +162,11 @@ export default function DashboardLayout() {
               to={link.path}
               onClick={(e) => handleNavClick(e, link)}
               className={({ isActive }) =>
-                `p-2 rounded-sm text-black relative ${isActive ? "bg-blue-200 font-bold" : ""}`
+                `p-2 rounded-sm text-black ${isActive ? "bg-blue-200 font-bold" : ""}`
               }
             >
               <div className="flex gap-1 items-center">
-                <div className="relative flex-shrink-0">
-                  <img className="w-[23px]" src={link.imgsrc} alt="icon" />
-                  {/* 🔒 lock badge for auth-required links when not logged in */}
-                  {link.requiresAuth && !user && (
-                    <span className="absolute -top-1 -right-1 text-[8px] bg-gray-400 text-white rounded-full w-3 h-3 flex items-center justify-center leading-none">
-                      🔒
-                    </span>
-                  )}
-                </div>
+                <img className="w-[23px]" src={link.imgsrc} alt="icon" />
                 <p className="sm:block hidden">{link.name}</p>
               </div>
             </NavLink>
